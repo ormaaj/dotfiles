@@ -1,0 +1,25 @@
+Config {
+--       font = "-misc-fixed-*-*-*-*-12-*-*-*-*-*-*-*"
+--       font = "xft:monospace:size=9"
+         font = "xft:terminus:size=9"
+--       font = "xft:Ubuntu:size=9"
+       , bgColor = "black"
+       , fgColor = "grey"
+       , position = TopW L 85
+       , lowerOnStart = False
+       , sepChar = "%"
+       , alignSep = "}{"
+       , commands = [ Run Weather "KMSP" ["-t","<tempF>F","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
+                    , Run Network "eth0" ["-L","0","-H","32","--normal","green","--high","red", "--width", "5"] 10
+                    , Run MultiCpu ["-t", "CPU:<total> <fc=#fff>:</fc><autototal>", "-L","3","-H","50","--normal","green","--high","red", "-p", "3"] 10
+                    , Run CoreTemp ["-t", "Temp: <core0> <core1> <core2> <core3>C", "-L", "40", "-H", "60", "-l", "lightblue", "-n", "gray90", "-h", "red"] 50
+                    , Run Memory ["-t","Mem: <usedratio>%"] 10
+                    , Run Swap [] 10
+                    , Run Com "uname" ["-s","-r"] "" 36000
+                    , Run Date "%a %b %_d %Y %H:%M:%S" "date" 10
+                    , Run StdinReader
+                    ]
+       , template = "%StdinReader%} %multicpu% | %coretemp% | %memory% <fc=#fff>:</fc> %swap% | %eth0% { <fc=#ee9a00>%date%</fc>| %KMSP% | %uname%"
+       }
+
+-- vim: set fenc=utf-8 ff=unix ft=haskell nowrap et:
