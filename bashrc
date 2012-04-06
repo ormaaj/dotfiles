@@ -26,6 +26,8 @@ brc() {
 # Direct recursion depth.
 # Search up the stack for the first non-FUNCNAME[1] and count how deep we are.
 callDepth() {
+    # Strip "main" off the end of FUNCNAME[@] if current function is named "main" and
+    # Bash added an extra "main" for non-interactive scripts.
     if [[ main == !(!("${FUNCNAME[1]}")|!("${FUNCNAME[-1]}")) && $- != *i* ]]; then
         local -a 'fnames=("${FUNCNAME[@]:1:${#FUNCNAME[@]}-2}")'
     else
@@ -45,6 +47,7 @@ callDepth() {
     printf -- $((n-1))
 }
 
+# Formatted cleancache stats monitor
 ccmon() {
     local interval="${1:-.5}"
 
@@ -57,6 +60,7 @@ ccmon() {
     done
 }
 
+# Set radeon power management
 clk() {
     local base=/sys/class/drm/card0/device
     case $1 in
