@@ -23,6 +23,28 @@ brc() {
     . ~/.bashrc
 }
 
+# Direct recursion depth.
+# Search up the stack for the first non-FUNCNAME[1] and count how deep we are.
+callDepth() {
+    if [[ main == !(!("${FUNCNAME[1]}")|!("${FUNCNAME[-1]}")) && $- != *i* ]]; then
+        local -a 'fnames=("${FUNCNAME[@]:1:${#FUNCNAME[@]}-2}")'
+    else
+        local -a 'fnames=("${FUNCNAME[@]:1}")'
+    fi
+
+    if (( ! ${#fnames[@]} )); then 
+        printf -- 0 
+        return
+    fi
+
+    local n
+    while [[ $fnames == ${fnames[++n]} ]]; do
+        :
+    done
+
+    printf -- $((n-1))
+}
+
 ccmon() {
     local interval="${1:-.5}"
 
@@ -173,6 +195,10 @@ trayr() {
     )
 
     nohup trayer "${opts[@]}"
+}
+
+unset2() {
+    unset -v -- "$@"
 }
 
 vimr() {
