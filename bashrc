@@ -1,8 +1,9 @@
-# These functions make liberal use of the very latest Bash features.
+# Warning: these functions make liberal use of the very latest Bash features.
 
 [[ $- != *i* ]] && return
 shopt -s extglob  
 
+# Debugging function for a nice colored graphical display of argv.
 args() {
     if [[ $- == *x* ]]; then
         set +x
@@ -117,6 +118,39 @@ flags() (
     echo "${out[@]}"
 )
 
+# Find the last modified file selected from a glob.
+# Usage: latest <glob> <varname>
+# Takes an optional glob and optional varname.
+# glob defaults to '*'. If varname is set, unset and assign to varname,
+# else output to stdout.
+latest() {
+    # Bending over backwards to not conflict with local names."
+    if (( $(callDepth) >= 2 )); then
+        unset -v x latest dirs
+        printf ${2:+'-v' "$2"} '%s' "$1"
+        return
+    fi
+
+    if (($# > 2)); then
+        echo $'Usage: latest <glob> <varname>\nError: Takes at most 2 arguments.'
+        return 1
+    fi >&2
+
+    if ! shopt -q nullglob; then
+        trap 'shopt -u nullglob' RETURN
+        shopt -s nullglob
+    fi
+
+    local -a 'dirs=(${1-*})'
+    local x latest
+
+    for x in "${!dirs[@]}"; do
+        [[ ${dirs[x]} -nt ${dirs[latest]} ]] && latest=$x
+    done
+
+    latest "${dirs[latest]}" ${2+"$2"}
+}
+
 lsfd() {
     local ofd=${ofd:-2} target=${target:-$BASHPID}
 
@@ -203,6 +237,8 @@ trayr() {
     nohup trayer "${opts[@]}"
 }
 
+# Unset the shell variable of the given args
+# in the next-outermost scope.
 unset2() {
     unset -v -- "$@"
 }
