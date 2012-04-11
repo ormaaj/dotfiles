@@ -1,3 +1,5 @@
+# These functions make liberal use of the very latest Bash features.
+
 [[ $- != *i* ]] && return
 shopt -s extglob  
 
@@ -35,7 +37,7 @@ callDepth() {
     fi
 
     if (( ! ${#fnames[@]} )); then 
-        printf -- 0 
+        printf 0 
         return
     fi
 
@@ -44,7 +46,7 @@ callDepth() {
         :
     done
 
-    printf -- $((n-1))
+    printf -- $n
 }
 
 # Formatted cleancache stats monitor
