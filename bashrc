@@ -1,4 +1,4 @@
-# Warning: these functions make liberal use of the very latest Bash features.
+# These functions assume the very latest Bash. 
 
 [[ $- != *i* ]] && return
 shopt -s extglob  
@@ -121,10 +121,10 @@ flags() (
 # Find the last modified file selected from a glob.
 # Usage: latest <glob> <varname>
 # Takes an optional glob and optional varname.
-# glob defaults to '*'. If varname is set, unset and assign to varname,
+# glob defaults to '*'. If varname is set, assign to varname,
 # else output to stdout.
 latest() {
-    # Bending over backwards to not conflict with local names."
+    # Bending over backwards to not conflict with local names.
     if (( $(callDepth) >= 2 )); then
         unset -v x latest dirs
         printf ${2:+'-v' "$2"} '%s' "$1"
@@ -151,6 +151,7 @@ latest() {
     latest "${dirs[latest]}" ${2+"$2"}
 }
 
+# lsof wrapper
 lsfd() {
     local ofd=${ofd:-2} target=${target:-$BASHPID}
 
@@ -190,6 +191,7 @@ EOF
     lsof -a -p $target -d "$fds" +f g -- >&${ofd} # >&2
 }
 
+# Broken
 xman() {
     if [[ ${FUNCNAME[1]} != $FUNCNAME ]]; then
         local curPID=$BASHPID
