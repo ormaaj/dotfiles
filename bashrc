@@ -3,12 +3,11 @@
 [[ $- != *i* ]] && return
 shopt -s extglob  
 
-# Debugging function for a nice colored graphical display of argv.
+# Debugging function for colored display of argv.
 args() {
     if [[ $- == *x* ]]; then
         set +x
-        { [[ $(trap -p RETURN | tee /dev/stderr) ]] 2>/dev/stdin && local savetrap=$(</dev/stdin); } <<<''
-        trap 'eval "${savetrap:-trap - RETURN}"; set -x' RETURN
+        trap 'set -x' RETURN
     fi
     
     if [[ -t ${ofd:-2} ]]; then
@@ -50,7 +49,7 @@ callDepth() {
     printf -- $n
 }
 
-# Formatted cleancache stats monitor
+# Formatted cleancache stats
 ccmon() {
     local interval="${1:-.5}"
 
@@ -78,14 +77,18 @@ clk() {
     esac
 }
 
+# Open EAPI pdf
 eapi() {
-    nohup okular "$(equery f --filter 'doc' 'app-doc/pms:live' | grep '.pdf')" &
+    nohup okular "$(equery f --filter 'doc' 'app-doc/pms:live' | grep '.pdf$')" &
 } >/dev/null 2>&1
 
+# List eix overlay numbers.
 eolist() {
     OVERLAYS_LIST=all PRINT_COUNT_ALWAYS=never eix -!
 }
 
+# Broken
+# Manage local overlays
 ecopy() {
     local my_overlay=/home/smorg/doc/custom
 
