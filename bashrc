@@ -128,8 +128,8 @@ flags() (
 # else output to stdout.
 latest() {
     # Bending over backwards to not conflict with local names.
-    if (( $(callDepth) >= 2 )); then
-        unset -v x latest dirs
+    if (($(callDepth) > 1)); then
+        unset -v x latest files
         printf ${2:+'-v' "$2"} '%s' "$1"
         return
     fi
@@ -144,14 +144,14 @@ latest() {
         shopt -s nullglob
     fi
 
-    local -a 'dirs=(${1-*})'
+    local -a 'files=(${1-*})'
     local x latest
 
-    for x in "${!dirs[@]}"; do
-        [[ ${dirs[x]} -nt ${dirs[latest]} ]] && latest=$x
+    for x in "${!files[@]}"; do
+        [[ ${files[x]} -nt ${files[latest]} ]] && latest=$x
     done
 
-    latest "${dirs[latest]}" ${2+"$2"}
+    latest "${files[latest]}" ${2+"$2"}
 }
 
 # lsof wrapper
@@ -211,9 +211,14 @@ pushd() {
       builtin pushd "${@:-$HOME}"
 }
 
-pwmake() {
-    local -a 'a=( {a..z} {A..Z} {0..9} )'
-    printf '%.1s' "${a[RANDOM%${#a[@]}]}"{0..15} $'\n'
+# Print a random alphanumeric string of a given length.
+rndstr() {
+    [[ $1 == +([[:digit:]]) ]] || return 1
+    (( $1 )) || return
+    local -a 'a=( {a..z} {A..Z} {0..9} )' \
+             'b=( "${a[RANDOM%${#a[@]}]"{1..'"$1"'}"}" )'
+    local IFS=
+    printf '%s' "${b[*]}"
 }
 
 rmvtp() {

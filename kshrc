@@ -119,7 +119,7 @@ environment.
 EOF
 
     typeset IFS=, fds=(${*:-{0..20}}) fds=("${fds[*]}")
-    lsof -a -p $target -d "$fds" +f g -- >&2 # >&${ofd}
+    lsof -a -p $target -d "$fds" +f g -- >&${ofd}
 }
 
 function pwmake {
