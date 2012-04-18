@@ -217,8 +217,7 @@ rndstr() {
     (( $1 )) || return
     local -a 'a=( {a..z} {A..Z} {0..9} )' \
              'b=( "${a[RANDOM%${#a[@]}]"{1..'"$1"'}"}" )'
-    local IFS=
-    printf '%s' "${b[*]}"
+    printf '%s' "${b[@]}"
 }
 
 rmvtp() {
