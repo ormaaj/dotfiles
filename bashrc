@@ -206,11 +206,11 @@ function latest {
 
 # lsof wrapper
 lsfd() {
-    local -A opts=( [u]='ofd' [t]='target' )
+    local -A opts=( [u]=ofd [t]=target )
     local ofd=${ofd:-2} target=${target:-$BASHPID}
 
     while [[ $1 == -* ]]; do
-        if [[ $2 != +([[:digit:]]) ]]; then
+        if [[ $1 != -@(h|\?|help) && $2 != +([[:digit:]]) ]]; then
             cat
             return 1
         fi
@@ -225,7 +225,7 @@ lsfd() {
                 ;;
             h|\?|help)
                 cat
-                return
+                return 0
         esac
     done <<EOF
 USAGE: ${FUNCNAME} [-h|-?|--help] [-u <fd>] [ -t <PID> ] [<fd1> <fd2> <fd3>...]
