@@ -62,12 +62,14 @@ set background=dark
 " let g:CSApprox_konsole = 1
 " colors freya
 " colors xoria256
-" colors wombat256
+" colors wombat256mod
 " colors camo
-" colors darkspectrum
 " colors desertEx
 " colors desert256
-colors candycode
+" colors candycode
+colors darkspectrum
+" colors dante
+" colors rdark
 " colors inkpot
 " colors blacksea
 " colors zenburn
@@ -110,7 +112,7 @@ import vim, subprocess
 fix = lambda f: (lambda x: x(x))(lambda y: f(lambda z: y(y)(z)))
 EOF
 
-nnoremap t :call Tpaste()<CR>
+" nnoremap t :call Tpaste()<CR>
 func! Tpaste()
 python << EOF
 vim.current.buffer.append(subprocess.Popen(['/usr/bin/tmux', 'showb'], stdout=subprocess.PIPE).communicate()[0][:-1], vim.current.window.cursor[0])

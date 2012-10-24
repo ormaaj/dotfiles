@@ -1,25 +1,26 @@
 Config {
 --       font = "-misc-fixed-*-*-*-*-12-*-*-*-*-*-*-*"
---       font = "xft:monospace:size=9"
-         font = "xft:terminus:size=9"
---       font = "xft:Ubuntu:size=9"
+       font = "xft:DejaVu Sans:size=9"
+--       font = "xft:terminus:size=9"
+--       font = "xft:Ubuntu Mono:size=11"
        , bgColor = "black"
        , fgColor = "grey"
        , position = TopW L 85
        , lowerOnStart = False
        , sepChar = "%"
        , alignSep = "}{"
-       , commands = [ Run Weather "KMSP" ["-t","<tempF>F","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
-                    , Run Network "eth0" ["-L","0","-H","32","--normal","green","--high","red", "--width", "5"] 10
-                    , Run MultiCpu ["-t", "CPU:<total> <fc=#fff>:</fc><autototal>", "-L","3","-H","50","--normal","green","--high","red", "-p", "3"] 10
-                    , Run CoreTemp ["-t", "Temp: <core0> <core1> <core2> <core3>C", "-L", "40", "-H", "60", "-l", "lightblue", "-n", "gray90", "-h", "red"] 50
-                    , Run Memory ["-t","Mem: <usedratio>%"] 10
-                    , Run Swap [] 10
-                    , Run Com "uname" ["-s","-r"] "" 36000
+       , commands = [ Run Weather "KMSP" ["-t", "<tempF>°", "-L", "32", "-H", "80", "-n", "green", "-h", "red", "-l", "lightblue"] 18000
+                    , Run Network "eth0" ["-L", "0", "-H", "32", "-n", "green", "-h", "red", "-l", "grey90", "-w", "5"] 5
+                    , Run MultiCpu ["-t", "CPU:<total> <fc=#fff>:</fc><autototal>", "-L", "3", "-H", "50", "-n", "green", "-h", "red", "-l", "grey90", "-w", "3"] 5
+                    , Run CoreTemp ["-t", "Temp: <core0> <core1> <core2> <core3>°C", "-L", "40", "-H", "60", "-l", "lightblue", "-n", "gray90", "-h", "red", "-d", "0"] 25 
+                    , Run Memory ["-t","Mem: <usedratio>%", "-n", "grey90"] 10
+                    , Run Swap ["-H", "90", "-h", "red", "-n", "grey90"] 10
+                    , Run Com "uname" ["-s","-r"] "" 18000
                     , Run Date "%a %b %_d %Y %H:%M:%S" "date" 10
                     , Run StdinReader
+--                    , Run DiskIO [("/var", "I/O: <read> <write>")] ["-m", "4"] 10
                     ]
-       , template = "%StdinReader%} %multicpu% | %coretemp% | %memory% <fc=#fff>:</fc> %swap% | %eth0% { <fc=#ee9a00>%date%</fc>| %KMSP% | %uname%"
+       , template = "%StdinReader%} %multicpu% | %coretemp% | %memory% <fc=#fff>:</fc> %swap% | %eth0% {<fc=#ee9a00>%date%</fc>| %KMSP% | %uname%"
        }
 
 -- vim: set fenc=utf-8 ff=unix ft=haskell nowrap et:
