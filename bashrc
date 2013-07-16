@@ -69,15 +69,72 @@ function sprunge {
 	curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"
 }
 
+function doCygwin {
+	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
+
+	# Change the window title of X terminals 
+	case $TERM in
+		xterm*|rxvt*|Eterm|aterm|kterm|gnome*|interix)
+			PROMPT_COMMAND='printf "\E]0;%s@%s:%s\a" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+			;;
+		screen*)
+			PROMPT_COMMAND='printf "\E_%s@%s:%s\E\\" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+	esac
+
+	if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
+		if [[ -f ~/.dir_colors ]]; then
+			eval "$(dircolors -b ~/.dir_colors)"
+		elif [[ -f /etc/DIR_COLORS ]]; then
+			eval "$(dircolors -b /etc/DIR_COLORS)"
+		fi
+
+		#if [[ ${EUID:-$(id -u)} == 0 ]] ; then
+			#PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+		#else
+			#PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+		#fi
+
+		ls() { command ls --color=auto "$@"; }
+		grep() { command grep --color=auto "$@"; }
+	elif [[ ${EUID:-$(id -u)} == 0 ]]; then
+		# PS1='\u@\h \W \$ '
+		:
+	else
+		# PS1='\u@\h \w \$ '
+		:
+	fi
+}
+
+function doLinux {
+	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
+
+	export \
+		PATH=/home/smorg/doc/projects/bash/scripts:${PATH} \
+		PAGER=vimpager \
+		MANPAGER=vimmanpager \
+		BROWSER=chromium-browser-live
+}
+
 function main {
 	unset -v PYTHONPATH
 	typeset -f +t "$FUNCNAME"
 	trap 'trap - RETURN; unset -f "$FUNCNAME"' RETURN
 	stty -ixon -ctlecho
-	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize
 	shopt -u interactive_comments
 	set -o vi
 	set +o histexpand
+
+	case $(uname -o) in
+		Cygwin)
+			doCygwin
+			;;
+		GNU/Linux)
+			doLinux
+			;;
+		*)
+			printf '%s\n' 'bashrc: Unknown "uname -o", assuming Linux' >&2
+			doLinux
+	esac
 
 	. "$(dirname "$(readlink -snf "$BASH_SOURCE")")/functions"
 
@@ -87,19 +144,14 @@ function main {
 		HISTTIMEFORMAT='%c ' \
 		PROMPT_COMMAND='history -a'
 
-	export \
-		PATH=/home/smorg/doc/projects/bash/scripts:${PATH} \
-		PAGER=vimpager \
-		MANPAGER=vimmanpager \
-		BROWSER=chromium-browser-live
 
 	if [[ $TERM == linux ]]; then
 		export TERM=linux-16color
-		loadkeys - <<\EOF 2>/dev/null
+		loadkeys -
+	fi <<\EOF 2>/dev/null
 keycode 1 = Caps_Lock
 keycode 58 = Escape
 EOF
-	fi
 
 	# www-plugins/chrome-binary-plugins
 	# . /etc/chromium/pepper-flash www-plugins/chrome-binary-plugins
