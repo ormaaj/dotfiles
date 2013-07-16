@@ -81,6 +81,11 @@ function doCygwin {
 			PROMPT_COMMAND='printf "\E_%s@%s:%s\E\\" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
 	esac
 
+	PROMPT_DIRTRIM=3
+	HISTSIZE=1000000
+	HISTTIMEFORMAT='%c '
+	PROMPT_COMMAND='history -a'
+
 	if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
 		if [[ -f ~/.dir_colors ]]; then
 			eval "$(dircolors -b ~/.dir_colors)"
@@ -107,6 +112,12 @@ function doCygwin {
 
 function doLinux {
 	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
+
+	declare -g \
+		PROMPT_DIRTRIM=3 \
+		HISTSIZE=1000000 \
+		HISTTIMEFORMAT='%c ' \
+		PROMPT_COMMAND='history -a'
 
 	export \
 		PATH=/home/smorg/doc/projects/bash/scripts:${PATH} \
@@ -137,12 +148,6 @@ function main {
 	esac
 
 	. "$(dirname "$(readlink -snf "$BASH_SOURCE")")/functions"
-
-	declare -g \
-		PROMPT_DIRTRIM=3 \
-		HISTSIZE=1000000 \
-		HISTTIMEFORMAT='%c ' \
-		PROMPT_COMMAND='history -a'
 
 
 	if [[ $TERM == linux ]]; then
