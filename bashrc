@@ -86,6 +86,10 @@ function doCygwin {
 	HISTTIMEFORMAT='%c '
 	PROMPT_COMMAND='history -a'
 
+	export \
+		PAGER=less \
+		MANPAGER=less
+
 	if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
 		if [[ -f ~/.dir_colors ]]; then
 			eval "$(dircolors -b ~/.dir_colors)"
