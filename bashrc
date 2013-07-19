@@ -69,6 +69,18 @@ function sprunge {
 	curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"
 }
 
+function cygServerAdmin {
+	while :; do
+		if ! net localgroup Administrators | grep -q cyg_server; then
+			net localgroup Administrators cyg_server /add
+			cygrunsrv -E sshd
+			sleep 1
+			cygrunsrv -S sshd
+		fi
+		sleep 20
+	done
+}
+
 function doCygwin {
 	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
 
