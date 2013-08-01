@@ -69,17 +69,6 @@ function sprunge {
 	curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"
 }
 
-function cygServerAdmin {
-	while :; do
-		if ! net localgroup Administrators | grep -q cyg_server; then
-			net localgroup Administrators cyg_server /add
-			cygrunsrv -E sshd
-			sleep 1
-			cygrunsrv -S sshd
-		fi
-		sleep 20
-	done
-}
 
 function doCygwin {
 	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
@@ -124,6 +113,25 @@ function doCygwin {
 		# PS1='\u@\h \w \$ '
 		:
 	fi
+
+	function autossh-wrapper {
+		while :; do
+			autossh -M 1234 -nNTR 3333:localhost:4114 smorg@ormaaj.org
+			sleep 30
+		done
+	}
+
+	function cygServerAdmin {
+		while :; do
+			if ! net localgroup Administrators | grep -q cyg_server; then
+				net localgroup Administrators cyg_server /add
+				cygrunsrv -E sshd
+				sleep 1
+				cygrunsrv -S sshd
+			fi
+			sleep 20
+		done
+	}
 }
 
 function doLinux {
