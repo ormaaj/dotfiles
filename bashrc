@@ -177,9 +177,12 @@ LINUX
 
 	[[ $curOS == "Linux" ]]
 	_function vimrx <<'CYGWIN' 3<&0 <<'LINUX' <&$((3 * $?))
-typeset fpath=$(xclip -o | cygpath -uf -)
-[[ ( ! -e $fpath ) && $fpath =~ ^\"(.*)\"$ ]] && fpath=${BASH_REMATCH[1]}
-vimr "$fpath"
+typeset -a fpath
+typeset x
+while IFS= read -r x; do
+	fpath=$(cygpath -u "$x") && [[ ( ! -e $fpath ) && $fpath =~ ^\"(.*)\"$ ]] && fpath+=("${BASH_REMATCH[1]}")
+done < <(xclip -o)
+vimr "${fpath[@]}"
 CYGWIN
 vimr "$(xclip -o)"
 LINUX
@@ -196,6 +199,7 @@ function main {
 	set -o vi
 	set +o histexpand
 
+	export XMLLINT_INDENT='    '
 	conditionalDefine
 
 	. "$(dirname "$(readlink -snf "$BASH_SOURCE")")/functions"
