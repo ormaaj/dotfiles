@@ -373,18 +373,6 @@ function unset2 {
 	unset -v -- "$@"
 }
 
-function vimr {
-	vim --servername ormaaj --remote "$@"
-}
-
-function weechat {
-	weechat-curses
-}
-
-function whois {
-	command whois -H "$@"
-}
-
 function zip_longest {
 	if [[ $1 == -v ]]; then :; fi  
 

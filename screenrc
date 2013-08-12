@@ -1,0 +1,19 @@
+# Default utf8
+defutf8 on
+
+term 'screen-256color'
+
+defhstatus "screen: ^En (^Et)"
+#hardstatus alwayslastline "%Lw"
+#defbce "on"
+
+# from http://www.cmdln.org/wp-content/uploads/2008/02/my.screenrc
+#vbell off
+startup_message off
+hardstatus alwayslastline
+hardstatus string '%{= kG}[%{G}%H%{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B}%d/%m %{G}%C%A]'
+termcapinfo xterm|xterms|xs|rxvt ti@:te@
+
+# something for colors?
+termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+termcapinfo xterm* OL=10000
