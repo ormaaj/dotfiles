@@ -21,6 +21,7 @@ set smartindent
 "set cindent
 set ttyfast
 set nobackup
+set ruler                                         " Make cursor position always visible
 
 "set completeopt+=longest                          " insert only the longest common text of the matches.
 " (for OmniSharp) don't autoselect first item in omnicomplete, show if only one item (for preview)

@@ -109,7 +109,7 @@ function conditionalDefine {
 
 			function autossh-wrapper {
 				while :; do
-					autossh -M 1234 -nNTR 3333:localhost:4114 smorg@ormaaj.org
+					autossh -M 1234 -nNTR 3333:localhost:4114 -R 3390:localhost:3389 smorg@ormaaj.org
 					sleep 30
 				done
 			}
@@ -118,13 +118,15 @@ function conditionalDefine {
 				while :; do
 					if ! net localgroup Administrators | grep -q cyg_server; then
 						net localgroup Administrators cyg_server /add
-						cygrunsrv -E sshd
-						sleep 1
-						cygrunsrv -S sshd
+						# cygrunsrv -E sshd
+						# sleep 1
+						# cygrunsrv -S sshd
 					fi
-					sleep 20
+					sleep 10
 				done
 			}
+
+			function vim { gvim -v "$@"; };
 			;;
 
 		Linux)
@@ -155,8 +157,24 @@ function conditionalDefine {
 						modprobe -- "$x"
 					done
 			}
+
+			function myrdp {
+				case $1 in
+					work)
+						rdesktop -EKPzg 1920x1200 -x 0x8F -u DWDouglas -d Orbits.net localhost
+						;;
+					kvm)
+						rdesktop -EKg 1920x1200 -x 0x80 -u Administrator localhost:3390
+						;;
+					*)
+						return 1
+				esac
+			}
 	esac
 
+	# Common functions constructed with conditional runtime behavior are below.
+
+	# Hack function defs.
 	# $(</dev/fd/*) broken on Cygwin
 	function _function {
 		typeset IFS=$' \t\n'
@@ -175,14 +193,29 @@ mapfile -t serverList < <("${vimCmd[@]}" --serverlist)
 "${vimCmd[@]}" --servername "${serverList[0]:-ormaaj}" ${serverList[0]:+--remote} "$@"
 LINUX
 
+# Windows Explorer's "copy as path" feature outputs a newline-delimited list of
+# quoted paths, with no trailing newline. This is ok since NTFS filenames can't
+# contain newlines or quotes. If we're on Cygwin, then build an array while
+# stripping quotes from pre-quoted paths only, and handle the sometimes missing
+# newline by copying to a herestring. (mapfile looks broken in 10 different
+# ways on Cygwin)
 	[[ $curOS == "Linux" ]]
 	_function vimrx <<'CYGWIN' 3<&0 <<'LINUX' <&$((3 * $?))
 typeset -a fpath
 typeset x
+
 while IFS= read -r x; do
-	fpath=$(cygpath -u "$x") && [[ ( ! -e $fpath ) && $fpath =~ ^\"(.*)\"$ ]] && fpath+=("${BASH_REMATCH[1]}")
-done < <(xclip -o)
-vimr "${fpath[@]}"
+	[[ ( ! -e $x ) && $x =~ ^\"(.*)\"$ ]] && x=${BASH_REMATCH[1]}
+	[[ $x ]] && fpath+=("$(cygpath -u "$x")")
+done <<<"$(xclip -o)"
+
+if (( ${#fpath[@]} )); then
+	vimr "${fpath[@]}"
+else
+	echo 'No paths' >&2
+	return 1
+fi
+
 CYGWIN
 vimr "$(xclip -o)"
 LINUX
