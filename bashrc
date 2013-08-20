@@ -161,10 +161,10 @@ function conditionalDefine {
 			function myrdp {
 				case $1 in
 					work)
-						rdesktop -EKPzg 1920x1200 -x 0x8F -u DWDouglas -d Orbits.net localhost
+						rdesktop -EKPzg 1920x1200 -x 0x8F -u DWDouglas -d Orbits.net localhost:3390
 						;;
 					kvm)
-						rdesktop -EKg 1920x1200 -x 0x80 -u Administrator localhost:3390
+						rdesktop -EKg 1920x1200 -x 0x80 -u Administrator 192.168.1.3
 						;;
 					*)
 						return 1
