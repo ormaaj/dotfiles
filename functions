@@ -343,10 +343,6 @@ function rndstr {
 	fi
 }
 
-function rmvtp {
-	rm -rf /var/tmp/portage/*
-}
-
 function sprunge {
 	curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"
 }

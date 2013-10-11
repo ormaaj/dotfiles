@@ -1,16 +1,20 @@
 [[ $- == *i* ]] || return
 
-# WARNING: functions that call localopt will have their trace attribute automatically removed.
+function onReturn {
+	trap 'trap "trap - RETURN; eval $(printf %q "$1")" RETURN' RETURN
+}
+
 #function localopt {
-#	typeset -a unsetopts setopts
-#	typeset opts serverlist servername=manpages
-#
-#	for opts in "$@"; do
-#		if [[ $SHELLOPTS != *${opt}* ]]; then
-#			set -o "$opt"
-#			unsetopts+=("$opt")
-#		fi
-#	done
+	#typeset -a setopts
+	#typeset x
+	#IFS=: read -ra setopts <<<"$BASHOPTS"
+
+	#for x in "${setopts[@]}"; do
+		#if [[ $BASHOPTS != *${opt}* ]]; then
+			#set -o "$opt"
+			#unsetopts+=("$opt")
+		#fi
+	#done
 #}
 
 #function man {
@@ -43,11 +47,19 @@
 #	} 3<&0
 #}
 
+# This file sets up the interactive environment and functions that are strictly for interactive use.
+
 function brc { . ~/.bashrc; }
 function pushd { command pushd "${@:-"$HOME"}"; }
 function sprunge { curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"; }
 function weechat { weechat-curses; }
 function whois { command whois -H "$@"; }
+
+function rmvtp {
+	shopt -s nullglob
+	rm -rf -- /var/tmp/portage/*
+	shopt -u nullglob
+}
 
 function conditionalDefine {
 	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
@@ -161,10 +173,10 @@ function conditionalDefine {
 			function myrdp {
 				case $1 in
 					work)
-						rdesktop -EKPzg 1920x1200 -x 0x8F -u DWDouglas -d Orbits.net localhost:3390
+						rdesktop -EKPzg 1920x1200 -x 0x8F -a 32 -u DWDouglas -d Orbits.net localhost:3390
 						;;
 					kvm)
-						rdesktop -EKg 1920x1200 -x 0x80 -u Administrator 192.168.1.3
+						rdesktop -EKg 1920x1200 -x 0x80 -a 24 -u Administrator 192.168.1.3
 						;;
 					*)
 						return 1
