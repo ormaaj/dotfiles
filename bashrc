@@ -20,7 +20,7 @@ function onReturn {
 #function man {
 #	if ! command man -W "$@"; then
 #		return 1
-#	elif [[ ! -t 0 ]]; then 
+#	elif [[ ! -t 0 ]]; then
 #		echo 'STDIN must be a tty.' >&2
 #		return 1
 #	fi
@@ -78,7 +78,7 @@ function conditionalDefine {
 
 	case $curOS in
 		Cygwin)
-			# Change the window title of X terminals 
+			# Change the window title of X terminals
 			case $TERM in
 				xterm*|rxvt*|Eterm|aterm|kterm|gnome*|interix)
 					PROMPT_COMMAND='printf "\E]0;%s@%s:%s\a" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
@@ -171,6 +171,7 @@ function conditionalDefine {
 			}
 
 			function myrdp {
+				rm -rf ~/.rdesktop
 				case $1 in
 					work)
 						rdesktop -EKPzg 1920x1200 -x 0x8F -a 32 -u DWDouglas -d Orbits.net localhost:3390

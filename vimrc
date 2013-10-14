@@ -8,9 +8,9 @@ set showcmd                                       " display incomplete commands
 set incsearch                                     " do incremental searching
 set ignorecase smartcase                          " ignore case sensitive searching
 set modeline                                      " enable modeline reading (has security implications)
-set tabstop=4                                     " Number of spaces that a <Tab> in the file counts for. 
+set tabstop=4                                     " Number of spaces that a <Tab> in the file counts for.
 set softtabstop=1
-set shiftwidth=4                                  " Number of spaces to use for each step of (auto)indent. 
+set shiftwidth=4                                  " Number of spaces to use for each step of (auto)indent.
 set noexpandtab
 "set expandtab                                    " In Insert mode: Use the appropriate number of spaces to insert a <Tab>
 set number
@@ -38,6 +38,8 @@ set undofile                                      " Enable persistent undo
 set undodir=/home/smorg/undodir                   " Persistent undo directory
 set ul=2000                                       " Undo levels to save
 set verbose=0
+set laststatus=2                                  " Always show the statusline (good for airline)
+
 "set rnu                                          " Numbering relative to the cursor
 let g:sh_no_error=1                                " Kill the broken bash error highlighting
 "let g:is_bash=1                                   " Use Bash sh highlighting mode globally
@@ -46,7 +48,7 @@ let g:is_mzscheme=1
 let g:lisp_rainbow=1
 
 if !exists("g:loaded_pathogen")
-	filetype off    
+	filetype off
 	call pathogen#infect()
 	call pathogen#helptags()
 endif
@@ -98,6 +100,7 @@ nnoremap <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
 nnoremap <Space> i<Space><Esc>
 nnoremap <Leader>t :MBEToggle<cr>
 nnoremap <Leader>n :NERDTreeToggle<CR>
+nnoremap <F8> :TagbarToggle<CR>
 
 " Plugin settings
 " ===============
@@ -106,16 +109,16 @@ nnoremap <Leader>n :NERDTreeToggle<CR>
 let g:CSApprox_attr_map = { 'sp' : 'fg' }
 
 	" MiniBufExpl
-let g:miniBufExplMapWindowNavVim = 1
-let g:miniBufExplMapCTabSwitchBufs = 1
-let g:miniBufExplUseSingleClick = 1
-let g:miniBufExplTabWrap = 1
+"let g:miniBufExplMapWindowNavVim = 1
+"let g:miniBufExplMapCTabSwitchBufs = 1
+"let g:miniBufExplUseSingleClick = 1
+"let g:miniBufExplTabWrap = 1
 
 	" 2html.vim
 let g:html_use_xhtml = 1 " Output xhtml format when using the :TOhtml command. See :h 2html.vim
 
 	" xmledit / xml.vim
-let g:xml_use_xhtml = 1  " Auto-close short tags to make valid XML. For xml.vim 
+let g:xml_use_xhtml = 1  " Auto-close short tags to make valid XML. For xml.vim
 let loaded_xmledit = 1
 " let xml_jump_string = "`"
 
@@ -124,6 +127,29 @@ let g:haddock_browser="/usr/bin/chromium"
 
 	" Gundo
 nnoremap <F6> :GundoToggle<CR>
+
+	" Airline
+
+let g:airline_detect_modified=1
+let g:airline_detect_paste=1
+let g:airline_detect_iminsert=1
+let g:airline_inactive_collapse=0
+
+let g:airline#extensions#bufferline#enabled = 1
+let g:airline#extensions#bufferline#overwrite_variables = 1
+
+let g:airline#extensions#tagbar#enabled = 1
+"let g:airline#extensions#tagbar#flags = ''  "default
+
+let g:airline#extensions#branch#enabled = 1
+
+let g:airline#extensions#tabline#enabled = 0
+let g:airline#extensions#tabline#show_buffers = 1
+let g:airline#extensions#tabline#tab_nr_type = 1 " tab number
+let g:airline#extensions#tabline#formatter = 'default'
+let g:airline#extensions#tabline#buffer_nr_show = 1
+let g:airline#extensions#tabline#buffer_nr_format = '%s: '
+let g:airline#extensions#tabline#fnamecollapse = 1
 
 	" OmniSharp
 "This is the default value, setting it isn't actually necessary
@@ -162,7 +188,7 @@ nnoremap <space> :OmniSharpGetCodeActions<cr>
 
 " rename with dialog
 nnoremap <leader>nm :OmniSharpRename<cr>
-nnoremap <F3> :OmniSharpRename<cr>      
+nnoremap <F3> :OmniSharpRename<cr>
 " rename without dialog - with cursor on the symbol to rename... ':Rename newname'
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 " Force OmniSharp to reload the solution. Useful when switching branches etc.
