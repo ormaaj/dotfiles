@@ -119,6 +119,15 @@ function conditionalDefine {
 				:
 			fi
 
+			# xclip not available on 64-bit Cygwin. (And I rely upon it heavily).
+			if [[ $HOSTTYPE == 'x86_64' ]]; then
+				function xclip {
+					case $1 in
+						-o) python -c 'import gtk; print(gtk.Clipboard(gtk.gdk.display_get_default(), "CLIPBOARD").wait_for_text())'
+					esac
+				}
+			fi
+
 			function autossh-wrapper {
 				while :; do
 					autossh -M 1234 -nNTR 3333:localhost:4114 -R 3390:localhost:3389 smorg@ormaaj.org
@@ -138,6 +147,7 @@ function conditionalDefine {
 				done
 			}
 
+			# Cygwin's plain vim built without X11 support, so run gvim nongraphically.
 			function vim { gvim -v "$@"; };
 			;;
 
