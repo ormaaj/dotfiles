@@ -119,6 +119,11 @@ function conditionalDefine {
 				:
 			fi
 
+			if [[ ! $DISPLAY ]]; then
+				startxwin
+				export DISPLAY=:0
+			fi
+
 			# xclip not available on 64-bit Cygwin. (And I rely upon it heavily).
 			if [[ $HOSTTYPE == 'x86_64' ]]; then
 				function xclip {

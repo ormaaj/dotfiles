@@ -12,8 +12,8 @@ defhstatus "screen: ^En (^Et)"
 startup_message off
 hardstatus alwayslastline
 hardstatus string '%{= kG}[%{G}%H%{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B}%d/%m %{G}%C%A]'
-termcapinfo xterm|xterms|xs|rxvt ti@:te@
+#termcapinfo xterm|xterms|xs|rxvt ti@:te@
 
 # something for colors?
-termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
-termcapinfo xterm* OL=10000
+#termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+#termcapinfo xterm* OL=10000
