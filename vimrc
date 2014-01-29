@@ -3,7 +3,7 @@ if v:progname =~? "evim"
 	finish
 endif
 
-set nowrap;
+set nowrap
 set backspace=indent,eol,start                    " allow backspacing over everything in insert mode
 set showcmd                                       " display incomplete commands
 set incsearch                                     " do incremental searching
@@ -83,6 +83,7 @@ set background=dark
 " colors desert256
 " colors candycode
 " colors darkspectrum
+" colors monokai
 colors molokai
 " colors dante
 " colors rdark

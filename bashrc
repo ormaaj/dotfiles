@@ -62,7 +62,7 @@ function rmvtp {
 }
 
 function conditionalDefine {
-	shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
+	shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
 
 	case $(uname -o) in
 		Cygwin)
@@ -157,7 +157,7 @@ function conditionalDefine {
 			;;
 
 		Linux)
-			shopt -s extglob globstar lastpipe cmdhist lithist histappend checkwinsize 2>/dev/null
+			shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
 
 			declare -g \
 				PROMPT_DIRTRIM=3 \
@@ -189,7 +189,7 @@ function conditionalDefine {
 				rm -rf ~/.rdesktop
 				case $1 in
 					work)
-						rdesktop -EKPzg 1920x1200 -x 0x8F -a 32 -u DWDouglas -d Orbits.net localhost:3390
+						rdesktop -EKPzg 1920x1200 -x 0x8F -a 32 -u DWDouglas -d Orbits.net -n Unknown localhost:3390
 						;;
 					kvm)
 						rdesktop -EKg 1920x1200 -x 0x80 -a 24 -u Administrator 192.168.1.3
