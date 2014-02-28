@@ -96,6 +96,7 @@ function conditionalDefine {
 				PAGER=less \
 				MANPAGER=less
 
+			# Setup dircolors for Cygwin. This occurs in the global /etc/bash/bashrc under Gentoo.
 			if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
 				if [[ -f ~/.dir_colors ]]; then
 					eval "$(dircolors -b ~/.dir_colors)"
@@ -154,10 +155,15 @@ function conditionalDefine {
 
 			# Cygwin's plain vim built without X11 support, so run gvim nongraphically.
 			function vim { gvim -v "$@"; };
-			;;
 
+			# Programmable completion (Cygwin).
+			# [[ -f /etc/bash_completion ]] && . /etc/bash_completion
+			;;
 		Linux)
 			shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
+
+			# Programmable completion (Gentoo).
+			# [[ -f /etc/profile.d/bash-completion ]] && . /etc/profile.d/bash-completion
 
 			declare -g \
 				PROMPT_DIRTRIM=3 \
@@ -171,6 +177,7 @@ function conditionalDefine {
 				MANPAGER=vimmanpager \
 				BROWSER=chromium-browser-live
 
+			# Load kvm-related modules
 			function kvmmodprobe {
 				typeset x
 				echo 'loading modules:'
@@ -185,6 +192,7 @@ function conditionalDefine {
 					done
 			}
 
+			# rdesktop wrapper for common presets.
 			function myrdp {
 				rm -rf ~/.rdesktop
 				case $1 in
@@ -202,8 +210,8 @@ function conditionalDefine {
 
 	# Common functions constructed with conditional runtime behavior are below.
 
-	# Hack function defs.
-	# $(</dev/fd/*) broken on Cygwin
+	# Hack function defs. Function code is read from stdin.
+	# Note $(</dev/fd/*) is broken on Cygwin. Using cat instead.
 	function _function {
 		typeset IFS=$' \t\n'
 		[[ -t 0 || -z ${1:+_} ]] && return 1
@@ -211,41 +219,40 @@ function conditionalDefine {
 	}
 	
 	[[ $curOS == "Linux" ]]
-	_function vimr <<'CYGWIN' 3<&0 <<'LINUX' <&$((3 * $?))
-typeset -a serverList vimCmd=(gvim -v)
-mapfile -t serverList < <("${vimCmd[@]}" --serverlist)
-"${vimCmd[@]}" --servername "${serverList[0]:-ormaaj}" ${serverList[0]:+--remote} "$@"
+	_function vimr <<-'CYGWIN' 3<&0 <<-'LINUX' <&$((3 * $?))
+		typeset -a serverList vimCmd=(gvim -v)
+		mapfile -t serverList < <("${vimCmd[@]}" --serverlist)
+		"${vimCmd[@]}" --servername "${serverList[0]:-ormaaj}" ${serverList[0]:+--remote} "$@"
 CYGWIN
-typeset -a serverList vimCmd=(vim)
-mapfile -t serverList < <("${vimCmd[@]}" --serverlist)
-"${vimCmd[@]}" --servername "${serverList[0]:-ormaaj}" ${serverList[0]:+--remote} "$@"
+		typeset -a serverList vimCmd=(vim)
+		mapfile -t serverList < <("${vimCmd[@]}" --serverlist)
+		"${vimCmd[@]}" --servername "${serverList[0]:-ormaaj}" ${serverList[0]:+--remote} "$@"
 LINUX
 
-# Windows Explorer's "copy as path" feature outputs a newline-delimited list of
-# quoted paths, with no trailing newline. This is ok since NTFS filenames can't
-# contain newlines or quotes. If we're on Cygwin, then build an array while
-# stripping quotes from pre-quoted paths only, and handle the sometimes missing
-# newline by copying to a herestring. (mapfile looks broken in 10 different
-# ways on Cygwin)
+	# Windows Explorer's "copy as path" feature outputs a newline-delimited list of
+	# quoted paths, with no trailing newline. This is ok since NTFS filenames can't
+	# contain newlines or quotes. If we're on Cygwin, then build an array while
+	# stripping quotes from pre-quoted paths only, and handle the sometimes missing
+	# newline by copying to a herestring. (mapfile looks broken in 10 different
+	# ways on Cygwin)
 	[[ $curOS == "Linux" ]]
-	_function vimrx <<'CYGWIN' 3<&0 <<'LINUX' <&$((3 * $?))
-typeset -a fpath
-typeset x
+	_function vimrx <<-'CYGWIN' 3<&0 <<-'LINUX' <&$((3 * $?))
+		typeset -a fpath
+		typeset x
 
-while IFS= read -r x; do
-	[[ ( ! -e $x ) && $x =~ ^\"(.*)\"$ ]] && x=${BASH_REMATCH[1]}
-	[[ $x ]] && fpath+=("$(cygpath -u "$x")")
-done <<<"$(xclip -o)"
+		while IFS= read -r x; do
+			[[ ( ! -e $x ) && $x =~ ^\"(.*)\"$ ]] && x=${BASH_REMATCH[1]}
+			[[ $x ]] && fpath+=("$(cygpath -u "$x")")
+		done <<<"$(xclip -o)"
 
-if (( ${#fpath[@]} )); then
-	vimr "${fpath[@]}"
-else
-	echo 'No paths' >&2
-	return 1
-fi
-
+		if (( ${#fpath[@]} )); then
+			vimr "${fpath[@]}"
+		else
+			echo 'No paths' >&2
+			return 1
+		fi
 CYGWIN
-vimr "$(xclip -o)"
+		vimr "$(xclip -o)"
 LINUX
 
 	unset -f _function
@@ -260,12 +267,26 @@ function main {
 	set -o vi
 	set +o histexpand
 
+	# Make the xmllint formatter use 4-space indents.
 	export XMLLINT_INDENT='    '
+
+	# Access remotely checked-out files over passwordless ssh for CVS
+	COMP_CVS_REMOTE=1
+
+	# Avoid stripping description in --option=description of './configure --help'
+	COMP_CONFIGURE_HINTS=1
+
+	# Define to avoid flattening internal contents of tar files
+	COMP_TAR_INTERNAL_PATHS=1
+
+
+	# Do platform-specific setup
 	conditionalDefine
 
+	# Source the general-purpose function library.
 	. "$(dirname "$(readlink -snf "$BASH_SOURCE")")/functions"
 
-
+	# If this is a real linux VT then allow 16 colors (default is 8) and swap caps-lock / escape keys
 	if [[ $TERM == linux ]]; then
 		export TERM=linux-16color
 		loadkeys -
@@ -273,11 +294,6 @@ function main {
 keycode 1 = Caps_Lock
 keycode 58 = Escape
 EOF
-
-	# www-plugins/chrome-binary-plugins
-	# . /etc/chromium/pepper-flash www-plugins/chrome-binary-plugins
-
-	# [[ -f /etc/profile.d/bash-completion ]] && . /etc/profile.d/bash-completion
 }
 
 # We want to show error output only if reloading this file via the `brc' wrapper.
