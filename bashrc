@@ -95,6 +95,7 @@ function conditionalDefine {
 			export \
 				PAGER=less \
 				MANPAGER=less
+				LESS=-r
 
 			# Setup dircolors for Cygwin. This occurs in the global /etc/bash/bashrc under Gentoo.
 			if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
