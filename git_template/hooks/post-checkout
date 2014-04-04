@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+${BASH_VERSION+shopt -s extglob lastpipe} 2>/dev/null
+
+if ! ${GIT_DIR+false}; then
+fi
+
+# vim: set fenc=utf-8 ff=unix ft=sh :
