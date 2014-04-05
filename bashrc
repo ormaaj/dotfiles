@@ -54,6 +54,8 @@ function pushd { command pushd "${@:-"$HOME"}"; }
 function sprunge { curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"; }
 function weechat { weechat-curses; }
 function whois { command whois -H "$@"; }
+function chown { command chown "${@/-r/-R}"; }
+function chmod { command chmod "${@/-r/-R}"; }
 
 function rmvtp {
 	shopt -s nullglob
