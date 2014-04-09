@@ -54,8 +54,22 @@ function pushd { command pushd "${@:-"$HOME"}"; }
 function sprunge { curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"; }
 function weechat { weechat-curses; }
 function whois { command whois -H "$@"; }
-function chown { command chown "${@/-r/-R}"; }
+function chown { command chown "${@/-r/-R}"; } # If I had a dollar for every time I typed -r...
 function chmod { command chmod "${@/-r/-R}"; }
+
+# umask 0640 makes this a frequently used command.
+function fixperms {
+	typeset x
+	typeset -a paths
+
+	for x; do
+		[[ -d $x ]] && paths+=("$x")
+	done
+
+	(( ${#paths[@]} )) || paths=(.)
+
+	find "$@" \( -type d -exec chmod o+rx -- {} + \) -o \( -type f -exec chmod o+r -- {} + \)
+}
 
 function rmvtp {
 	shopt -s nullglob
