@@ -51,10 +51,10 @@ main = do
             myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
                 [ ((modm, xK_a), sendMessage ShrinkSlave)
                 , ((modm, xK_z), sendMessage ExpandSlave)
-                , ((modm, xK_F12), xmonadPrompt defaultXPConfig)
-                , ((modm, xK_p), shellPrompt defaultXPConfig) 
-                , ((modm .|. shiftMask, xK_g), windowPromptGoto defaultXPConfig)
-                , ((modm .|. shiftMask, xK_b), windowPromptBring defaultXPConfig)
+                , ((modm, xK_F12), xmonadPrompt def)
+                , ((modm, xK_p), shellPrompt def) 
+                , ((modm .|. shiftMask, xK_g), windowPromptGoto def)
+                , ((modm .|. shiftMask, xK_b), windowPromptBring def)
                 , ((modm, xK_b), sendMessage ToggleStruts) --toggles dock gaps
                 , ((modm, xK_x), sendMessage $ Toggle FULL)
                 , ((modm .|. controlMask, xK_k), nextWS)
