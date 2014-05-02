@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# General setup for the Cygwin environment.
+function setupCygwin {
+			PROMPT_DIRTRIM=3
+			HISTSIZE=1000000
+			HISTTIMEFORMAT='%c '
+			PROMPT_COMMAND='history -a'
+
+			export \
+				PAGER=less \
+				MANPAGER=less
+				LESS=-r
+
+			# Change the window title of X terminals
+			ase $TERM in
+				xterm*|rxvt*|Eterm|aterm|kterm|gnome*|interix)
+					PROMPT_COMMAND='printf "\E]0;%s@%s:%s\a" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+					;;
+				screen*)
+					PROMPT_COMMAND='printf "\E_%s@%s:%s\E\\" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+			esac
+
+			# Setup dircolors for Cygwin. This normally occurs in the global /etc/bash/bashrc under Gentoo.
+			if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
+				if [[ -f ~/.dir_colors ]]; then
+					eval "$(dircolors -b ~/.dir_colors)"
+				elif [[ -f /etc/DIR_COLORS ]]; then
+					eval "$(dircolors -b /etc/DIR_COLORS)"
+				fi
+
+				#if [[ ${EUID:-$(id -u)} == 0 ]] ; then
+					#PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+				#else
+					#PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+				#fi
+			elif [[ ${EUID:-$(id -u)} == 0 ]]; then
+				# PS1='\u@\h \W \$ '
+				:
+			else
+				# PS1='\u@\h \w \$ '
+				:
+			fi
+
+			# Start the Cygwin/X server
+			if [[ ! $DISPLAY ]]; then
+				startxwin
+				export DISPLAY=:0
+			fi
+}
+
+# xclip not available on 64-bit Cygwin. (And I rely upon it heavily).
+if [[ $HOSTTYPE == 'x86_64' ]]; then
+	function xclip {
+		case $1 in
+			-o) python -c 'import gtk; print(gtk.Clipboard(gtk.gdk.display_get_default(), "CLIPBOARD").wait_for_text())'
+		esac
+	}
+fi
+
+# vim: set fenc=utf-8 ff=unix ft=sh :

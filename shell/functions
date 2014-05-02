@@ -53,31 +53,31 @@ function callDepth {
 # Direct recursion depth.
 # Search up the stack for the first non-FUNCNAME[1] and count how deep we are.
 # Result goes to stdout, or is optionally assigned to the given variable name.
-function callDepth2 {
-	# Unset all locals, then "Return" the output or assign to the given variable.
-	if [[ $FUNCNAME == ${FUNCNAME[1]} ]]; then
-		unset -v n fnames
-		printf "$@"
-		return
-	fi
-
-	# Strip "main" off the end of FUNCNAME[@] if current function is named "main" and
-	# Bash added an extra "main" for non-interactive scripts.
-	if [[ main == !(!("${FUNCNAME[1]}")|!("${FUNCNAME[-1]}")) && $- != *i* ]]; then
-		typeset -a fnames=("${FUNCNAME[@]:1:${#FUNCNAME[@]}-2}")
-	else
-		typeset -a fnames=("${FUNCNAME[@]:1}")
-	fi
-
-	typeset n=
-	if (( ${#fnames[@]} )); then
-		while [[ $fnames == ${fnames[++n]} ]]; do
-			:
-		done
-	fi
-
-	${2:+"$FUNCNAME" -v} "${2:-printf}" %d "${n:-0}"
-}
+#function callDepth2 {
+#	# Unset all locals, then "Return" the output or assign to the given variable.
+#	if [[ $FUNCNAME == ${FUNCNAME[1]} ]]; then
+#		unset -v n fnames
+#		printf "$@"
+#		return
+#	fi
+#
+#	# Strip "main" off the end of FUNCNAME[@] if current function is named "main" and
+#	# Bash added an extra "main" for non-interactive scripts.
+#	if [[ main == !(!("${FUNCNAME[1]}")|!("${FUNCNAME[-1]}")) && $- != *i* ]]; then
+#		typeset -a fnames=("${FUNCNAME[@]:1:${#FUNCNAME[@]}-2}")
+#	else
+#		typeset -a fnames=("${FUNCNAME[@]:1}")
+#	fi
+#
+#	typeset n=
+#	if (( ${#fnames[@]} )); then
+#		while [[ $fnames == ${fnames[++n]} ]]; do
+#			:
+#		done
+#	fi
+#
+#	${2:+"$FUNCNAME" -v} "${2:-printf}" %d "${n:-0}"
+#}
 
 # Formatted cleancache stats
 function ccmon {
@@ -242,6 +242,19 @@ function latest {
 	fi
 }
 
+#function localopt {
+#	typeset -a setopts
+#	typeset x
+#	IFS=: read -ra setopts <<<"$BASHOPTS"
+#
+#	for x in "${setopts[@]}"; do
+#		if [[ $BASHOPTS != *${opt}* ]]; then
+#			set -o "$opt"
+#			unsetopts+=("$opt")
+#		fi
+#	done
+#}
+
 # lsof wrapper
 function lsfd {
 	local -A opts=(
@@ -307,6 +320,11 @@ p
 w
 EOF
 
+# FIXME
+function onReturn {
+	trap 'trap "trap - RETURN; eval $(printf %q "$1")" RETURN' RETURN
+}
+
 function pushPromptCommand {
 	eval "$PROMPT_COMMAND"
 	case $TERM in
@@ -347,28 +365,11 @@ function sprunge {
 	curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"
 }
 
-function trayr {
-	typeset -a opts=(
-		--edge top
-		--align right
-		--SetDockType true
-		--SetPartialStrut true
-		--expand true
-		--widthtype percent
-		--width 15
-		--transparent true
-		--tint 0x000000
-		--heighttype pixel
-		--height 12
-	)
-
-	trayer "${opts[@]}" & disown
-}
-
 function unset2 {
 	unset -v -- "$@"
 }
 
+# FIXME
 function zip_longest {
 	if [[ $1 == -v ]]; then :; fi  
 

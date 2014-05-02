@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# Copyright © 2012-2014 Dan Douglas <ormaaj@gmail.com>
+# This file may be distributed under the terms of the MIT license. See the accompaning LICENSE file.
+
+#function man {
+#	if ! command man -W "$@"; then
+#		return 1
+#	elif [[ ! -t 0 ]]; then
+#		echo 'STDIN must be a tty.' >&2
+#		return 1
+#	fi
+#
+#
+#	if [[ $- != *m* ]]; then
+#		set -m
+#	fi
+#
+#	trap 'trap RETURN; set +m' RETURN
+#
+#	typeset serverlist servername=manpages
+#
+#	# if vim --serverlist | grep -q "$servername"
+#
+#	typeset serverlist
+#	vim --serverlist | mapfile -tc1 -C ' serverlist'
+#
+#	{
+#		{
+#			groffer --text -Tutf8 -rLL=$((${COLUMNS:-$(tput cols)}-10))n -man "$@" 2>/dev/null ||
+#				kill -"$BASHPID"
+#		} | sed -e 's/\x1B\[[[:digit:]]\+m//g' | vim -c 'set nomod ft=man' --servername manpages --remote /dev/fd/4 4<&0 <&3
+#	} 3<&0
+#}
+
+function brc {
+	command . ~/.bashrc
+}
+
+function pushd {
+	command pushd "${@:-"$HOME"}"
+}
+
+function sprunge {
+	curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"
+}
+
+function weechat {
+	weechat-curses
+}
+
+function whois {
+	command whois -H "$@"
+}
+
+# If I had a dollar for every time I typed "chown -r"...
+function chown {
+	command chown "${@/-r/-R}"
+}
+
+function chmod {
+	command chmod "${@/-r/-R}"
+}
+
+# Quick and dirty cleanup of portage cache.
+function rmvtp {
+	shopt -s nullglob
+	rm -rf -- /var/tmp/portage/*
+	shopt -u nullglob
+}
+
+function ls {
+	command ls --color=auto "$@"
+}
+
+function grep {
+	command grep --color=auto "$@"
+}
+
+# Convenience function to quickly add world read permissions to files and world
+# read/write permissions to directories recursively.  The «-u user[:group]»
+# option will additionally chmod all files and directories recursively.
+# Intended to be a lazy way to give things like git repos some usable
+# permissions when I'm using umaxk 640.
+function fixperms {
+	typeset -a paths
+
+	while ! ${1+false}; do
+		case $1 in
+			-u)
+				if [[ -n $2 ]]; then
+					typeset _chmodUserGroup=$2
+					command shift 2
+				else
+					echo 'Must supply a user:group for the -u option' >&2
+					return 1
+				fi
+				;;
+			--)
+				[[ -n $2 ]] && paths+=("${@:2}")
+				command shift "$#"
+				break
+				;;
+			*)
+				[[ -d $1 ]] && paths+=("$1")
+		esac
+	done
+
+	(( ${#paths[@]} )) || paths+=(.)
+
+	find "$@" \( -type d -exec chmod o+rx -- {} + \) -o \( -type f -exec chmod o+r -- {} + \)
+	${_chmodUserGroup:+chown "${_chmodUserGroup}" }
+}
+
+# vim: set fenc=utf-8 ff=unix ft=sh :

@@ -36,8 +36,8 @@ set ssop=blank,buffers,folds,help,tabpages,winpos " adjust what state informatio
 set hidden                                        " Keeps changes in unsaved buffers when hiding. (You probably want this)
 set spelllang=en_us
 set undofile                                      " Enable persistent undo
-set undodir=/home/smorg/undodir                   " Persistent undo directory
-set ul=2000                                       " Undo levels to save
+set undodir=~/undodir                             " Defines the persistent undo directory
+set ul=2000                                       " Number of undo levels to save
 set verbose=0
 set laststatus=2                                  " Always show the statusline (good for airline)
 
