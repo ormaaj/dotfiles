@@ -1,3 +1,82 @@
 #!/usr/bin/env bash
+# Copyright © 2012-2014 Dan Douglas <ormaaj@gmail.com>
+# May be distributed under the terms of the MIT license.
+
+# This library includes functions for setting up the interactive environment as
+# well as functions that are intended for interactive use.
+
+function setupLinux {
+	shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
+
+	# Programmable completion (Gentoo).
+	# [[ -f /etc/profile.d/bash-completion ]] && . /etc/profile.d/bash-completion
+
+	declare -g \
+		PROMPT_DIRTRIM=3 \
+		HISTSIZE=1000000 \
+		HISTTIMEFORMAT='%c ' \
+		PROMPT_COMMAND='history -a'
+
+	export \
+		PATH=/home/smorg/doc/projects/bash/scripts:${PATH} \
+		PAGER=vimpager \
+		MANPAGER=vimmanpager \
+		BROWSER=chromium-browser-live
+
+}
+
+# Load kvm-related modules.
+function kvmmodprobe {
+	typeset x
+	echo 'loading modules:' >&2
+
+	{
+		find "/lib/modules/$(uname -r)" -iname '*virtio*' -printf '%f\0'
+		printf '%s\0' 9p # Additional modules.
+	} | while IFS= read -rd '' x; do
+			x=${x%.*}
+			printf '%4s%s\n' '' "$x" >&2
+			modprobe -- "$x"
+		done
+}
+
+# rdesktop wrapper
+function myrdp {
+	rm -rf ~/.rdesktop
+	case $1 in
+		work)
+			rdesktop -EKPzg 1920x1200 -x 0x8F -a 32 -u DWDouglas -d Orbits.net -n Unknown localhost:3390
+			;;
+		kvm)
+			rdesktop -EKg 1920x1200 -x 0x80 -a 24 -u Administrator 192.168.1.3
+			;;
+		*)
+			return 1
+	esac
+}
+
+# shortcut for default trayer options
+function trayr {
+	typeset -a opts=(
+		--edge top
+		--align right
+		--SetDockType true
+		--SetPartialStrut true
+		--expand true
+		--widthtype percent
+		--width 15
+		--transparent true
+		--tint 0x000000
+		--heighttype pixel
+		--height 12
+	)
+
+	trayer "${opts[@]}" & disown
+}
+
+# Calls vimr using xclip output.
+function vimrx {
+	vimr "$(xclip -o)"
+}
 
 # vim: set fenc=utf-8 ff=unix ft=sh :

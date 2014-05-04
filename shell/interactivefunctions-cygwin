@@ -1,52 +1,113 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash # Copyright © 2012-2014 Dan Douglas <ormaaj@gmail.com>
+# May be distributed under the terms of the MIT license.
 
-# General setup for the Cygwin environment.
+# This library includes functions for setting up the interactive environment as
+# well as functions that are intended for interactive use.
+
+# Perform general setup for the Cygwin environment.
 function setupCygwin {
-			PROMPT_DIRTRIM=3
-			HISTSIZE=1000000
-			HISTTIMEFORMAT='%c '
-			PROMPT_COMMAND='history -a'
+	PROMPT_DIRTRIM=3
+	HISTSIZE=1000000
+	HISTTIMEFORMAT='%c '
+	PROMPT_COMMAND='history -a'
 
-			export \
-				PAGER=less \
-				MANPAGER=less
-				LESS=-r
+	export \
+		PAGER=less \
+		MANPAGER=less \
+		LESS=-r
 
-			# Change the window title of X terminals
-			ase $TERM in
-				xterm*|rxvt*|Eterm|aterm|kterm|gnome*|interix)
-					PROMPT_COMMAND='printf "\E]0;%s@%s:%s\a" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
-					;;
-				screen*)
-					PROMPT_COMMAND='printf "\E_%s@%s:%s\E\\" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
-			esac
+	# Change the window title of X terminals
+	case $TERM in
+		xterm*|rxvt*|Eterm|aterm|kterm|gnome*|interix)
+			PROMPT_COMMAND='printf "\E]0;%s@%s:%s\a" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+			;;
+		screen*)
+			PROMPT_COMMAND='printf "\E_%s@%s:%s\E\\" "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+	esac
 
-			# Setup dircolors for Cygwin. This normally occurs in the global /etc/bash/bashrc under Gentoo.
-			if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
-				if [[ -f ~/.dir_colors ]]; then
-					eval "$(dircolors -b ~/.dir_colors)"
-				elif [[ -f /etc/DIR_COLORS ]]; then
-					eval "$(dircolors -b /etc/DIR_COLORS)"
-				fi
+	# Setup dircolors for Cygwin. This normally occurs in the global
+	# /etc/bash/bashrc under Gentoo.
+	if x=$(tput colors) y=$? let 'y || x >= 8' && type -P dircolors >/dev/null; then
+		typeset f 
+		for f in ~/.dir_colors /etc/DIR_COLORS; do 
+			[[ -f $f && -r $f ]] && eval "$(dircolors -b "$f")"
+		done
+	fi
 
-				#if [[ ${EUID:-$(id -u)} == 0 ]] ; then
-					#PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
-				#else
-					#PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
-				#fi
-			elif [[ ${EUID:-$(id -u)} == 0 ]]; then
-				# PS1='\u@\h \W \$ '
-				:
-			else
-				# PS1='\u@\h \w \$ '
-				:
-			fi
+	# Start the Cygwin/X server if needed.
+	if [[ ! $DISPLAY ]]; then
+		startxwin
+		export DISPLAY=:0
+	fi
 
-			# Start the Cygwin/X server
-			if [[ ! $DISPLAY ]]; then
-				startxwin
-				export DISPLAY=:0
-			fi
+	# Programmable completion (Cygwin).
+	# [[ -f /etc/bash_completion ]] && . /etc/bash_completion
+}
+
+# Convenience wrapper for autossh
+function autossh-wrapper {
+	typeset autosshHostDefault
+
+	if [[ -n $1 ]]; then
+		autossh_host_default=$1
+	elif [[ -r ~/.autossh_host_default ]]; then
+		IFS= read -r autosshHostDefault <~/autossh_host_default default_user
+	else
+		echo 'No user@host argument specified, or ~/autossh_host_default file' >&2
+		return 1
+	fi
+
+	if [[ $autossh_host_default == !()@!() ]]; then
+		# Loop probably unnecessary, but it doesn't hurt.
+		while :; do
+			autossh -M 1234 -nNTR 3333:localhost:4114 -R 3390:localhost:3389 smorg@ormaaj.org
+			sleep 30
+		done
+	else
+		printf 'Invalid "user@host" pattern specified: %s\n' "$autosshHostDefault" >&2 
+		return 1
+	fi
+}
+
+function cygServerAdmin {
+	while :; do
+		if ! net localgroup Administrators | grep -q cyg_server; then
+			net localgroup Administrators cyg_server /add
+			# cygrunsrv -E sshd
+			# sleep 1
+			# cygrunsrv -S sshd
+		fi
+		sleep 10
+	done
+}
+
+# Cygwin's plain "vim" is built without X11 support, so run gvim nongraphically.
+function vim {
+	gvim -v "$@"
+}
+
+# Calls vimr using xclip output.
+function vimrx {
+	typeset -a fpath
+	typeset x
+
+	# Windows Explorer's "copy as path" feature outputs a newline-delimited list of
+	# quoted paths, with no trailing newline. This is ok since NTFS filenames can't
+	# contain newlines or quotes. If we're on Cygwin, then build an array while
+	# stripping quotes from pre-quoted paths only, and handle the sometimes missing
+	# newline by copying to a herestring. (mapfile looks broken in 10 different
+	# ways on Cygwin)
+	while IFS= read -r x; do
+		[[ ( ! -e $x ) && $x =~ ^\"(.*)\"$ ]] && x=${BASH_REMATCH[1]}
+		[[ $x ]] && fpath+=("$(cygpath -u "$x")")
+	done <<<"$(xclip -o)"
+
+	if (( ${#fpath[@]} )); then
+		vimr "${fpath[@]}"
+	else
+		echo 'No paths' >&2
+		return 1
+	fi
 }
 
 # xclip not available on 64-bit Cygwin. (And I rely upon it heavily).
