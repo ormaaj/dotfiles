@@ -208,6 +208,13 @@ function isSubset {
 	done
 }
 
+function isDigit {
+	typeset x
+	for x; do
+		[[ $x == +([0-9]) ]] || return
+	done
+}
+
 function ixio {
 	local n x
 }
@@ -257,46 +264,46 @@ function latest {
 
 # lsof wrapper
 function lsfd {
-	local -A opts=(
-		[u]='ofd=$2'
-		[t]='target=$2'
-	)
+	typeset x ofd=2 target=$BASHPID
 
-	local ofd=${ofd:-2} target=${target:-$BASHPID}
-
-	while [[ $1 == -* ]]; do
-		${opts[$1]+}
-		if [[ $1 != -@(h|\?|help) && $2 != +([[:digit:]]) ]]; then
-			cat >&2
-			return 1
-		fi
-		case ${1##+(-)} in
-			u)
-				ofd=$2
-				shift 2
-				;;
-			t)
-				target=$2
-				shift 2
-				;;
-			h|\?|help)
-				cat >&2
-				return 0
-		esac
-	done <<-EOF
+	{ typeset helpText=$(</dev/fd/0); } <<-EOF
 	USAGE: ${FUNCNAME} [-h|-?|--help] [-u <fd>] [ -t <PID> ] [<fd1> <fd2> <fd3>...]
 
 	This is a small lsof wrapper which displays the open file descriptors of the
 	current BASHPID. If no FDs are given, the default FDs to display are those open
 	by the current process. ofd can also be set in the environment.
 
-	-u <fd>: Use fd for output. Defaults to stderr. Overrides ofd set in the environment.
-	-t <PID>: Use PID instead of BASHPID. Overrides "target" set in the environment.
+	-u <fd>: Use fd for output. Defaults to stderr.
+	-t <PID>: Use PID instead of BASHPID.
 EOF
 
-	# Fixme: unsafe without input validation for digits.
+	while [[ $1 == -* ]]; do
+		if [[ $1 != -@(h|\?|help) && $2 != +([0-9]) ]]; then
+			echo 'Error: bad parameter. use --help for options.' >&2
+			return 1
+		fi
+		case ${1##+(-)} in
+			u)
+				ofd=$2
+				command shift 2
+				;;
+			t)
+				target=$2
+				command shift 2
+				;;
+			h|\?|help)
+				echo "$helpText" >&2
+				return
+				;;
+			--)
+				command shift
+				break
+		esac
+	done
+
+	IFS=, 
 	IFS=, local -a "fds=(${*:-/proc/\${target:-self}/fd/*})" 'fds=("${fds[*]##*/}")'
-	lsof -a -p $target -d "$fds" +f g -- >&"$ofd" # >&2
+	lsof -a -p "$target" -d "$fds" +f g -- >&"$ofd" # >&2
 }
 
 # Fix for broken applications (all KDE apps) which cannot read either stdin or pipes. Example:

@@ -85,11 +85,9 @@ function grep {
 	command grep --color=auto "$@"
 }
 
-# Convenience function to quickly add world read permissions to files and world
-# read/write permissions to directories recursively.  The «-u user[:group]»
-# option will additionally chmod all files and directories recursively.
-# Intended to be a lazy way to give things like git repos some usable
-# permissions when I'm using umaxk 640.
+# Quickly adds world read permissions to files and world read/write permissions
+# to directories recursively.  «-u user[:group]» will additionally chmod files
+# and directories recursively.
 function fixperms {
 	typeset -a paths
 
@@ -116,8 +114,7 @@ function fixperms {
 
 	(( ${#paths[@]} )) || paths+=(.)
 
-	find "$@" \( -type d -exec chmod o+rx -- {} + \) -o \( -type f -exec chmod o+r -- {} + \)
-	${_chmodUserGroup:+chown "${_chmodUserGroup}" }
+	find "${paths[@]}" ${_chmodUserGroup:+-exec chown "$_chmodUserGroup" -- {} +} \( -type d -exec chmod o+rx -- {} + \) -o \( -type f -exec chmod o+r -- {} + \)
 }
 
 # Open the given files in an existing vim instance.
