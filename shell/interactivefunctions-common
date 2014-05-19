@@ -90,12 +90,13 @@ function grep {
 # and directories recursively.
 function fixperms {
 	typeset -a paths
+	typeset chmodUserGroup
 
 	while ! ${1+false}; do
 		case $1 in
 			-u)
 				if [[ -n $2 ]]; then
-					typeset _chmodUserGroup=$2
+					typeset chmodUserGroup=$2
 					command shift 2
 				else
 					echo 'Must supply a user:group for the -u option' >&2
@@ -109,12 +110,13 @@ function fixperms {
 				;;
 			*)
 				[[ -d $1 ]] && paths+=("$1")
+				command shift
 		esac
 	done
 
 	(( ${#paths[@]} )) || paths+=(.)
 
-	find "${paths[@]}" ${_chmodUserGroup:+-exec chown "$_chmodUserGroup" -- {} +} \( -type d -exec chmod o+rx -- {} + \) -o \( -type f -exec chmod o+r -- {} + \)
+	find "${paths[@]}" ${chmodUserGroup:+-exec chown "$chmodUserGroup" -- '{}' +} \( -type d -exec chmod o+rx -- {} + \) -o \( -type f -exec chmod o+r -- {} + \)
 }
 
 # Open the given files in an existing vim instance.

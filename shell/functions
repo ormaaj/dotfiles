@@ -265,6 +265,7 @@ function latest {
 # lsof wrapper
 function lsfd {
 	typeset x ofd=2 target=$BASHPID
+	typeset -a fds
 
 	{ typeset helpText=$(</dev/fd/0); } <<-EOF
 	USAGE: ${FUNCNAME} [-h|-?|--help] [-u <fd>] [ -t <PID> ] [<fd1> <fd2> <fd3>...]
@@ -277,11 +278,7 @@ function lsfd {
 	-t <PID>: Use PID instead of BASHPID.
 EOF
 
-	while [[ $1 == -* ]]; do
-		if [[ $1 != -@(h|\?|help) && $2 != +([0-9]) ]]; then
-			echo 'Error: bad parameter. use --help for options.' >&2
-			return 1
-		fi
+	while ! ${1+false}; do
 		case ${1##+(-)} in
 			u)
 				ofd=$2
@@ -304,6 +301,17 @@ EOF
 	IFS=, 
 	IFS=, local -a "fds=(${*:-/proc/\${target:-self}/fd/*})" 'fds=("${fds[*]##*/}")'
 	lsof -a -p "$target" -d "$fds" +f g -- >&"$ofd" # >&2
+}
+
+function mapfile2 {
+	typeset -a callbacks
+	typeset arg
+	for arg; do
+		case $arg in
+			-C)
+				callbacks+=("$2")
+		esac
+	done
 }
 
 # Fix for broken applications (all KDE apps) which cannot read either stdin or pipes. Example:
@@ -376,10 +384,17 @@ function unset2 {
 	unset -v -- "$@"
 }
 
-# FIXME
-function zip_longest {
-	if [[ $1 == -v ]]; then :; fi  
+# TODO unfinished
+function Zip {
+	typeset arg
+	typeset -A opts
 
+	while ! ${1+false}; do
+		case $1 in
+			*) :
+			;;
+		esac
+	done
 
 	: "${_[0]"{0..9}"+"{"x","x"}"}" # "
 }
