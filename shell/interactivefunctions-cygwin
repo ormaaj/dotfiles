@@ -81,6 +81,11 @@ function cygServerAdmin {
 	done
 }
 
+function cygservicewrap {
+	typeset -A cygServices
+	typeset name stak
+}
+
 # Cygwin's plain "vim" is built without X11 support, so run gvim nongraphically.
 function vim {
 	gvim -v "$@"

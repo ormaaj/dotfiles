@@ -5,6 +5,8 @@
 # This library includes functions for setting up the interactive environment as
 # well as functions that are intended for interactive use.
 
+# DISPLAY=:0 /opt/oracle-jdk-bin-1.8.0.5/bin/java -Xmx2048M -Xms2048M -jar ./doc/programs/minecraft_server.1.7.9.jar nogui
+
 function setupLinux {
 	shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
 

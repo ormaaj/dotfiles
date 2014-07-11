@@ -329,7 +329,7 @@ function togglePolipo {
 		rc-service polipo restart
 	fi
 } <<\EOF
-g/#\?socksP/s/^/#/\
+g/#\?socksParentProxy/s/^/#/\
 s/^##//\
 p
 w

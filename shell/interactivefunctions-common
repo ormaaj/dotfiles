@@ -54,7 +54,11 @@ function sprunge {
 }
 
 function weechat {
-	weechat-curses
+	if type -p weechat-curses >/dev/null; then
+		weechat-curses
+	else
+		command weechat
+	fi
 }
 
 function whois {
@@ -92,7 +96,7 @@ function fixperms {
 	typeset -a paths
 	typeset chmodUserGroup
 
-	while ! ${1+false}; do
+	until ${1+false}; do
 		case $1 in
 			-u)
 				if [[ -n $2 ]]; then
