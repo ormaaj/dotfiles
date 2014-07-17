@@ -87,7 +87,7 @@ function minecraft {
 				 # Open the fifo without blocking using a temporary fd in case there's no writer.
 				 {
 					 {
-						 lsof -ap "$BASHPID" -d 0-20 +f G >&2
+						 #lsof -ap "$BASHPID" -d 0-20 +f G >&2
 						 #cat
 						 "$jvm" -Xmx4096M -jar "$serverPath" nogui
 					 } 3<>"${mcopts[p]}" </dev/fd/3 3>&-
@@ -97,7 +97,7 @@ function minecraft {
 				return 1
 			fi
 		else
-			"$jvm" -Xmx4096M -jar "$serverPath" nogui &
+			"$jvm" -Xmx4096M -Xboundthreads -jar "$serverPath" nogui &
 		fi
 		printf 'Minecraft server PID: %d\n' "$!"
 		wait
