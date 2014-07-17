@@ -113,9 +113,17 @@ function composePE {
 	:	
 }
 
+# die status [ formatstring ] args ...
+function die {
+	printf ${3-'%s\n'} "${@:2}" >&2
+
+	[[ $1 == +([0-9]) ]] || set 1
+	exit ${1-1}
+}
+
 # Open EAPI pdf
 function eapi {
-	okular "$(equery f --filter 'doc' 'app-doc/pms:live' | grep '.pdf$')" >/dev/null 2>&1 &
+	okular "$(equery f --filter doc app-doc/pms:live | grep '.pdf$')" >/dev/null 2>&1 &
 	disown
 }
 
@@ -387,16 +395,8 @@ function unset2 {
 # TODO unfinished
 function Zip {
 	typeset arg
+	typeset -a 
 	typeset -A opts
-
-	while ! ${1+false}; do
-		case $1 in
-			*) :
-			;;
-		esac
-	done
-
-	: "${_[0]"{0..9}"+"{"x","x"}"}" # "
 }
 
 # vim: set fenc=utf-8 ff=unix ft=sh :

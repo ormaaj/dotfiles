@@ -8,7 +8,7 @@
 # DISPLAY=:0 /opt/oracle-jdk-bin-1.8.0.5/bin/java -Xmx2048M -Xms2048M -jar ./doc/programs/minecraft_server.1.7.9.jar nogui
 
 function setupLinux {
-	shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
+	shopt -s interactive_comments extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
 
 	# Programmable completion (Gentoo).
 	# [[ -f /etc/profile.d/bash-completion ]] && . /etc/profile.d/bash-completion
@@ -27,6 +27,11 @@ function setupLinux {
 
 }
 
+# STFU RMS.
+function gdb {
+	command gdb -q "$@"
+}
+
 # Load kvm-related modules.
 function kvmmodprobe {
 	typeset x
@@ -42,6 +47,66 @@ function kvmmodprobe {
 		done
 }
 
+# Stupid game.
+# minecraft -c | -s [ -p ]
+function minecraft {
+	typeset \
+		jvm=${JAVA_HOME}/bin/java \
+		worldPath=${HOME}/doc/mcdata2 \
+		serverPath=${HOME}/doc/programs/mcserver/minecraft_server.14w29b.jar \
+		clientPath=${HOME}/doc/programs/Minecraft.jar
+
+	typeset opt OPTARG OPTIND OPTERR=0
+	typeset -A mcopts
+
+	[[
+		-d $worldPath &&
+		-x $jvm
+	]] || return
+
+	while getopts :scp: opt; do
+		case $opt in
+			\?)
+				printf 'Unknown option: %s\n' "$OPTARG" >&2
+				return 1
+				;;
+			:)
+				printf '-%s requires an argument.\n' "$OPTARG" >&2
+				return 1
+				;;
+			*)
+				mcopts[$opt]=$OPTARG
+				OPTARG=
+		esac
+	done
+
+	if ! ${mcopts[s]+false}; then # Server
+		pushd "$worldPath" || return
+		if ! ${mcopts[p]+false}; then # If user supplies a fifo then read from it.
+			if [[ -p ${mcopts[p]} ]]; then
+				 # Open the fifo without blocking using a temporary fd in case there's no writer.
+				 {
+					 {
+						 lsof -ap "$BASHPID" -d 0-20 +f G >&2
+						 #cat
+						 "$jvm" -Xmx4096M -jar "$serverPath" nogui
+					 } 3<>"${mcopts[p]}" </dev/fd/3 3>&-
+				 } &
+			else
+				printf '%s must be a readable/writable named pipe\n' "${mcopts[p]}" >&2
+				return 1
+			fi
+		else
+			"$jvm" -Xmx4096M -jar "$serverPath" nogui &
+		fi
+		printf 'Minecraft server PID: %d\n' "$!"
+		wait
+		popd
+	elif ! ${mcopts[c]+false}; then # Client
+		"$jvm" -jar "$clientPath"
+	fi
+}
+
 # rdesktop wrapper
 function myrdp {
 	rm -rf ~/.rdesktop
@@ -51,6 +116,9 @@ function myrdp {
 			;;
 		kvm)
 			rdesktop -EKg 1920x1200 -x 0x80 -a 24 -u Administrator 192.168.1.3
+			;;
+		laptop)
+			rdesktop -EKg 1920x1200 -x 0x80 -a 24 -u ormaaj ormaaj-win8
 			;;
 		*)
 			return 1
