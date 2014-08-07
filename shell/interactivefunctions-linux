@@ -52,17 +52,14 @@ function kvmmodprobe {
 function minecraft {
 	typeset \
 		jvm=${JAVA_HOME}/bin/java \
-		worldPath=${HOME}/doc/mcdata2 \
-		serverPath=${HOME}/doc/programs/mcserver/minecraft_server.14w29b.jar \
-		clientPath=${HOME}/doc/programs/Minecraft.jar
+		worldPath=~/doc/mcdata2 \
+		serverPath=~/doc/programs/ServerJarStorage/Release\ 14w31a/minecraft_server.jar \
+		clientPath=~/doc/programs/Minecraft.jar
 
 	typeset opt OPTARG OPTIND OPTERR=0
 	typeset -A mcopts
 
-	[[
-		-d $worldPath &&
-		-x $jvm
-	]] || return
+	[[ -x $jvm ]] || return
 
 	while getopts :scp: opt; do
 		case $opt in
@@ -97,7 +94,7 @@ function minecraft {
 				return 1
 			fi
 		else
-			"$jvm" -Xmx4096M -Xboundthreads -jar "$serverPath" nogui &
+			"$jvm" -Xmx4096M -jar "$serverPath" nogui &
 		fi
 		printf 'Minecraft server PID: %d\n' "$!"
 		wait
@@ -141,7 +138,7 @@ function trayr {
 		--height 12
 	)
 
-	trayer "${opts[@]}" & disown
+	trayer-srg "${opts[@]}" & disown
 }
 
 # Calls vimr using xclip output.
