@@ -113,12 +113,13 @@ function composePE {
 	:	
 }
 
-# die status [ formatstring ] args ...
+# exit with a optional status and optional message. status defaults to the previous command.
+# die [ status ] [ formatstring ] [ message args ... ]
 function die {
-	printf ${3-'%s\n'} "${@:2}" >&2
-
-	[[ $1 == +([0-9]) ]] || set 1
-	exit ${1-1}
+	typeset status=$?
+	[[ $1 == +([0-9]) ]] && status=$1
+	${2:+printf ${3-'%s\n'} "${@:2}"} >&2
+	exit "$status"
 }
 
 # Open EAPI pdf
