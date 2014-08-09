@@ -35,10 +35,10 @@ function setupCygwin {
 	fi
 
 	# Start the Cygwin/X server if needed.
-	if [[ ! $DISPLAY ]]; then
-		startxwin
-		export DISPLAY=:0
-	fi
+#	if [[ ! $DISPLAY ]]; then
+#		startxwin
+#		export DISPLAY=:0
+#	fi
 
 	# Programmable completion (Cygwin).
 	# [[ -f /etc/bash_completion ]] && . /etc/bash_completion
