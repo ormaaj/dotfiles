@@ -86,6 +86,11 @@ function cygservicewrap {
 	typeset name stak
 }
 
+# Start setup with cygport repository
+function cygsetup {
+	cygstart -- ~/doc/programs/setup-x86_64.exe -K 'http://cygwinports.org/ports.gpg' & disown
+}
+
 # Cygwin's plain "vim" is built without X11 support, so run gvim nongraphically.
 function vim {
 	gvim -v "$@"
@@ -115,7 +120,7 @@ function vimrx {
 	fi
 }
 
-# xclip not available on 64-bit Cygwin. (And I rely upon it heavily).
+# xclip not available on 64-bit Cygwin. (unfinished)
 if [[ $HOSTTYPE == 'x86_64' ]]; then
 	function xclip {
 		case $1 in
