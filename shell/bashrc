@@ -2,9 +2,38 @@
 # May be distributed under the terms of the MIT license.
 [[ $- == *i* ]] || return
 
+# Shell configuration that applies to all environments.
+function setupUniversalOptions {
+	stty -ixon -ctlecho
+	shopt -u interactive_comments lithist
+	shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
+	set -o vi                        # Set interactive vi mode.
+	set +o histexpand                # Disable history expansion.
+}
+
+# Set env vars that always apply to this user's interactive shells.
+function setupUniversalEnvironment {
+	unset -v PYTHONPATH
+	export XMLLINT_INDENT='    '     # Make the xmllint formatter use 4-space indents.
+	export COMP_CVS_REMOTE=1         # Access remotely checked-out files over passwordless ssh for CVS
+	export COMP_CONFIGURE_HINTS=1    # Avoid stripping description in --option=description of './configure --help'
+	export COMP_TAR_INTERNAL_PATHS=1 # Define to avoid flattening internal contents of tar files
+	export MONO_USE_LLVM=1
+
+	# If this is a real linux VT then allow 16 colors (default is 8) and swap caps-lock / escape keys
+	if [[ $TERM == linux ]]; then
+		export TERM=linux-16color
+		loadkeys -
+	fi <<\EOF 2>/dev/null
+keycode 1 = Caps_Lock
+keycode 58 = Escape
+EOF
+}
+
+# Source the appropriate libraries for the current runtime environment.
 function sourceFuncs {
 	typeset myRootPath
-	if myRootPath=$(dirname "$(readlink -snf "$BASH_SOURCE")") && ! ${myRootPath:+false}; then
+	if myRootPath=$(dirname "$(readlink -snf -- "$BASH_SOURCE")") && [[ -d $myRootPath ]]; then
 		# Source the general-purpose function library.
 		command . "${myRootPath}/functions" || printf 'Warning: sourcing function library returned nonzero status for the path: %q\n' "${myRootPath}/interactivefunctions" >&2
 
@@ -33,30 +62,12 @@ function sourceFuncs {
 }
 
 function main {
-	unset -v PYTHONPATH
 	typeset -f +t "$FUNCNAME"
 	trap 'trap - RETURN; unset -f "$FUNCNAME"' RETURN
-	stty -ixon -ctlecho
-	shopt -u interactive_comments lithist
-	shopt -s extglob globstar lastpipe cmdhist histappend checkwinsize 2>/dev/null
-	set -o vi                        # Set interactive vi mode.
-	set +o histexpand                # Disable history expansion.
 
-	export XMLLINT_INDENT='    '     # Make the xmllint formatter use 4-space indents.
-	export COMP_CVS_REMOTE=1         # Access remotely checked-out files over passwordless ssh for CVS
-	export COMP_CONFIGURE_HINTS=1    # Avoid stripping description in --option=description of './configure --help'
-	export COMP_TAR_INTERNAL_PATHS=1 # Define to avoid flattening internal contents of tar files
-
+	setupUniversalOptions || echo 'Warning: setupUniversalOptions returned nonzero.' >&2
+	setupUniversalEnvironment || echo 'Warning: setupUniversalEnvironment returned nonzero.' >&2
 	sourceFuncs || echo 'Warning: sourceFuncs returned nonzero.' >&2
-
-	# If this is a real linux VT then allow 16 colors (default is 8) and swap caps-lock / escape keys
-	if [[ $TERM == linux ]]; then
-		export TERM=linux-16color
-		loadkeys -
-	fi <<\EOF 2>/dev/null
-keycode 1 = Caps_Lock
-keycode 58 = Escape
-EOF
 }
 
 # If we want to show error output only if reloading this file via the `brc' wrapper.
