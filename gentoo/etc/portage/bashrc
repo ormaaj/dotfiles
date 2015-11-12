@@ -1,0 +1,356 @@
+#!/usr/bin/env bash
+# /etc/portage/bashrc
+# Dan Douglas <d@ndougl.as>
+
+[[ $EBUILD_PHASE != setup ]] && return
+
+# Declare bashrc functions.
+# Always call `__bashrc_Func_Tool__ collisioncheck` first!
+function __bashrc_Funcs__ {
+	# Deprecated (eventually)
+	# bashrcRunHooks "$CATEGORY" "$PN"
+	function bashrcRunSingleHook {
+		typeset x
+		for x; do
+			[[ $x ]] || return
+		done
+
+		# Define mappings from package names to hook functions.
+		typeset -A categoryDefs=(
+			[app-admin]='([mcelog]=bashrcDebugBuild2)'
+			[app-arch]='([p7zip]=bashrcNoGraphite)'
+			[app-crypt]='([bashrcHeimdal]=bashrcHeimdal)'
+			[app-shells]='([ksh]=bashrcDebugBuild [mksh]=bashrcDebugBuild [bash]=bashrcDebugBuild)'
+			[app-office]='([libreoffice]=bashrcPlainBuild)'
+			[app-text]='([texlive-core]=bashrcNoGraphite [multitail]=bashrcNoGraphite [ghostscript-gpl]=bashrcNoGraphite)'
+			[dev-db]='([sqlite]=bashrcNoFast [mysql-connector-c++]=bashrcNoGraphite [mysql]=bashrcNoGraphite [postgresql-base]=bashrcNoFast [postgresql]=bashrcNoFast)'
+			[dev-java]='([icedtea]=bashrcNoGraphite)'
+			#[dev-libs]='([isl]=bashrcNoGraphite [cloog]=bashrcNoGraphite [gmp]=bashrcNoGraphite)'
+			[dev-libs]='([libclc]=bashrcNoGraphite)'
+			[dev-dotnet]='([libgdiplus]=bashrcNoGraphite)'
+			[dev-python]='([pyxattr]=bashrcNoError [matplotlib]=bashrcNoGraphite)'
+			[dev-util]='([valgrind]=bashrcEpUser [radare2]=bashrcPlainBuild)'
+			[dev-qt]='([qtcore]=xbashrcNoFast [qtgui]=bashrcNoGraphite [qtwidgets]=bashrcNoGraphite)'
+			[kde-apps]='([okular]=bashrcNoError [kpat]=bashrcNoGraphite)'
+			[kde-base]='([kdelibs]=bashrcKdeLibs)'
+			[kde-frameworks]='([kjs]=bashrcPlainBuild)'
+			[media-gfx]='([digikam]=bashrcDgKamFix [rawstudio]=bashrcNoFast [sane-backends]=bashrcNoGraphite [fontforge]=bashrcNoGraphite [graphviz]=bashrcNoGraphite)'
+			[media-libs]='([xine-lib]=bashrcNoGraphite [libraw]=bashrcNoGraphite [aalib]=bashrcNoGraphite [x264]=bashrcNoGraphite [opencv]=bashrcNoGraphite [gst-plugins-good]=bashrcNoGraphite [gst-plugins-bad]=bashrcNoGraphite [opus]=bashrcPlainBuild)'
+			[media-sound]='([timidity++]=bashrcNoGraphite)'
+			[media-video]='([ffmpeg]=bashrcNoGraphite)'
+			[net-analyzer]='([rrdtool]=bashrcNoFast [nmap]=bashrcNoGraphite)'
+			[net-misc]='([openssh]=bashrcDebugBuild [mosh]=bashrcStd++14)'
+			[net-proxy]='([polipo]=bashrcDebugBuild)'
+			[sci-libs]='([scipy]=bashrcNoGraphite [gdal]=bashrcNoGraphite)'
+			[sys-apps]='([coreutils]=bashrcDebugBuild [findutils]=bashrcDebugBuild [util-linux]=bashrcDebugBuild)'
+			[sys-fs]='([udev]=bashrcNoFast)'
+			[sys-libs]='([glibc]=bashrcPlainBuild [db]=bashrcNoFast [ncurses]=bashrcNoGraphite [glibc]=bashrcDebugBuild)'
+			[sys-devel]='([binutils]=bashrcDoBinutils [gdb]=bashrcNoGraphite [clang]=bashrcNoGraphite [llvm]=bashrcNoGraphite)'
+			[x11-base]='([xorg-server]=bashrcNoGraphite)'
+			[x11-libs]='([wxGTK]=bashrcNoGraphite [libXi]=bashrcNoGraphite)'
+			[x11-misc]='([virtualgl]=bashrcNoGraphite [xscreensaver]=bashrcNoGraphite)'
+			[www-client]='([phantomjs]=bashrcNoFast [chromium]=bashrcDoChromium [firefox]=bashrcNoGraphite [links]=bashrcNoGraphite)'
+		) "packageDefs=${categoryDefs[$1]}"
+
+		# If a hook is defined for the current package, run it. Otherwise setup
+		# default flags. Remember if you want to use default flags as a base for a
+		# hook, you must run bashrcSetupFlags within the hook. This allows using
+		# different default flag groups as a base per-package.
+		typeset -A flags
+		if typeset -f "${packageDefs[$2]:-:}" >/dev/null 2>&1; then
+			${2:+"${packageDefs[$2]:-false}"} || return
+			${2:+'unset' '-f' "${packageDefs[$2]}"}
+			einfo "bashrc: Hook function: ${packageDefs[$2]} -- finished successfully. :)"
+		else
+			# Each defined key of the "flags" array will become part of CFLAGS.
+			if [[ $OVERRIDE_FLAGS ]]; then
+				IFS=' ' read -ra OVERRIDE_FLAGS <<<"$OVERRIDE_FLAGS"
+				bashrcSetupFlags flags "${OVERRIDE_FLAGS[@]}"
+				einfo "bashrc: No hook function defined for ${1}/${2} -- used user-defined OVERRIDE_FLAGS. :)"
+			else
+				if bashrcIsClang; then
+					einfo 'bashrc: Looks like this is clang. Omitting graphite flags.'
+					bashrcSetupFlags flags base || die 'bashrcSetupFlags failed' # No graphite flags
+				else
+					bashrcSetupFlags flags base graphite || die 'bashrcSetupFlags failed.'
+				fi
+
+				einfo "bashrc: No hook function defined for ${1}/${2} -- used default flag groups. :)"
+			fi
+		fi
+
+		export C{,XX}"FLAGS=${!flags[*]}"
+	}
+
+	# Set up the initial associative array of CFLAGS and CXXFLAGS. 
+	# Takes an array name to assign and optionally the names of "flag groups" to include.
+	# bashrcSetupFlags arrname groupname [ groupname ... ]
+	function bashrcSetupFlags {
+		if [[ -z $1 ]]; then
+			eerror "${FUNCNAME}: Must pass at least a non-empty associative array name argument."
+			return 1
+		else
+			typeset -n __groupArray=$1
+			# Base CFLAG groups
+			typeset -A groups=(
+				[base]='(-march=native -Ofast -fno-stack-protector -pipe)'
+				[graphite]='(-floop-interchange -floop-strip-mine -floop-block)'
+				[debug]='(-ggdb)'
+				[lto]='(-flto=16)'
+			)
+
+			typeset x
+			typeset -a y
+			for x in "${@:2}"; do
+				if ${groups[$x]:+'false'}; then
+					eerror "${FUNCNAME}: Invalid flag group name: ${x}"
+					return 1
+				else
+					eval "y=${groups[$x]}"
+					eval "$(printf '__groupArray[%q]= ' "${y[@]}")"
+				fi
+			done
+		fi
+	}
+
+	function bashrcIsClang {
+		set C{C,XX,PP}
+		typeset -n __varname
+		for __varname; do
+			[[ $__varname == *clang* ]] && return
+		done
+
+		return 1
+	}
+
+	function bashrcRunHooks {
+		typeset x
+		for x; do
+			[[ $x ]] || return
+		done
+	}
+
+	#########
+	# All package hooks below
+	#########
+
+	function bashrcBaseFlags {
+		bashrcSetupFlags flags base graphite || return
+	}
+
+#	function bashrcDoSocat {
+#		flags=(['-mtune=generic']= [-O2]= [-ggdb]= [-pipe]=)
+		#export LIBS=-static
+#	}
+
+	function bashrcStd++14 {
+		bashrcBaseFlags
+		flags[-std=gnu++14]=
+	}
+
+	# s/-Ofast/-O3/
+	function bashrcNoFast {
+		bashrcSetupFlags flags base graphite || return
+		unset -v 'flags[-Ofast]'
+		flags[-O3]=
+	}
+
+	function bashrcNoGraphite {
+		bashrcSetupFlags flags base || return
+	}
+
+	# s/-Ofast/-O2/
+	function bashrcPlainBuild {
+		bashrcSetupFlags flags base || return
+		unset -v 'flags[-Ofast]'
+		flags[-O3]=
+	}
+
+	function bashrcNoError {
+		bashrcSetupFlags flags base graphite || return
+		flags[-Wno-error]=
+	}
+
+	function bashrcDebugBuild {
+		bashrcSetupFlags flags base graphite debug || return
+		flags[-ggdb]=
+	}
+
+	function bashrcDebugBuild2 {
+		bashrcSetupFlags flags base debug || return
+		unset -v flags\[{-OFast,-fno-stack-protector}\]
+		eval flags\[{-O0,-ggdb}\]=
+		MAKEOPTS=-j1
+	}
+
+	function bashrcHeimdal {
+		bashrcSetupFlags flags base graphite || return
+		flags[-pthread]=
+	}
+
+	function bashrcKdeLibs {
+		bashrcSetupFlags base
+	}
+
+	function bashrcAMake112 {
+		bashrcSetupFlags flags base graphite || return
+		export WANT_AUTOMAKE=1.12
+	}
+
+	function bashrcDgKamFix {
+		bashrcSetupFlags flags base graphite || return
+		export MYSQL_TOOLS_PATH=/usr/share/mysql/scripts
+	}
+
+	function bashrcDoBinutils {
+		bashrcSetupFlags flags base graphite debug || return
+		export EXTRA_ECONF=--enable-gold=default
+	}
+
+	function bashrcDoKsh {
+		bashrcSetupFlags flags base graphite || return
+		pre_pkg_setup() {
+			local d='printf "<%s> " "${FUNCNAME[@]}"; echo; inherit flag-o-matic; trap -- DEBUG RETURN'
+			local -a dcmd=( trap "$(printf %q "$d")" DEBUG )
+			trap "${dcmd[*]}" RETURN
+			printf "<%s> " "${FUNCNAME[@]}"; echo
+		}
+
+		pre_src_prepare() {
+			append-flags "-fplugin=/usr/$(get_libdir)/llvm/dragonegg.so" -fplugin-arg-dragonegg-enable-gcc-optzns
+			einfo "${FUNCNAME}: applied - $_"
+
+			local x srcdir=/home/smorg/doc/programs/ast-open
+			pushd "$srcdir"
+			addwrite "$srcdir"
+			git checkout 2012-05-15
+			for x in **/Mamfile; do
+				[[ -d ${WORKDIR}/${x%Mamfile} ]] && cp "$x" "${WORKDIR}/${x%Mamfile}"
+			done
+
+			git checkout master
+			adddeny "$srcdir"
+			popd
+		}
+	}
+
+	function bashrcEpUser {
+		post_src_prepare() { epatch_user; }
+	}
+
+	function bashrcDoChromium {
+		bashrcSetupFlags flags base || return
+		unset -v 'flags[-Ofast]'
+		flags[-O3]=
+	}
+
+	function bashrcDoEvdev {
+		export COLLISION_IGNORE='/usr/share/X11/xorg.conf.d/10-evdev.conf'
+	}
+}
+
+# Prevent elusive namespace issues.
+function __bashrc_Func_Tool__ {
+	typeset -a bashrcFuncs=(
+		bashrcSetupFlags
+		bashrcRunHooks
+		bashrcRunSingleHook
+		bashrcBaseFlags
+		bashrcHeimdal
+		bashrcNoError
+		bashrcNoFast
+		bashrcNoGraphite
+		bashrcKdeLibs
+		bashrcPlainBuild
+		bashrcDebugBuild
+		bashrcDoChromium
+		bashrcDoBinutils
+		bashrcAMake112
+		bashrcDgKamFix
+		bashrcDoKsh
+		bashrcEpUser
+		bashrcIsClang
+	)
+
+	case $1 in
+		collisioncheck)
+			typeset func
+			for func in "${bashrcFuncs[@]}"; do
+				if [[ $(type -t "$func") == function ]]; then
+					ewarn "${FUNCNAME}: FUNCTION COLLISION DETECTED! ${func}"
+					return 1
+				fi
+			done
+			;;
+		cleanup)
+			if ! unset -f "${bashrcFuncs[@]}" __bashrc_Func_Tool__ __bashrc_Funcs__ __bashrc_Main__; then
+				ewarn "${FUNCNAME}: Failed cleaning up functions."
+				return 1
+			fi
+			;;
+		*)
+			ewarn "${FUNCNAME}: Invalid operation: ${1}. Doing nothing."
+			return 1
+	esac
+}
+
+function __bashrc_Main__ {
+	# Force current bash. Because why not?
+	(( BASH_VERSINFO[0] >= 4 && BASH_VERSINFO[1] >= 3 )) || die 'bashrc requires at least Bash 4.3.'
+
+	typeset -a shopts=(extglob lastpipe)
+	typeset opt
+	for opt in "${!shopts[@]}"; do
+		if shopt -q "${shopts[opt]}"; then
+			unset -v 'shopts[opt]'
+		else
+			shopt -s "${shopts[opt]}"
+		fi
+	done
+	(( ${#shopts[@]} )) && trap 'trap RETURN; shopt -u "${shopts[@]}"' RETURN
+
+	# We could try to save and restore functions to avoid collisions, but
+	# it's probably better to just fail loudly and fix the collision
+	# instead.
+	__bashrc_Func_Tool__ collisioncheck || die 'bashrc: collision check failed.'
+	__bashrc_Funcs__ || die 'bashrc: Somehow failed declaring functions?' # Should never happen.
+
+	# Not yet implemented.
+	typeset -A hookMap=(
+		[app-arch/p7zip]='(bashrcBaseFlags bashrcNoGraphite)'
+		[app-shells/ksh]='(bashrcBaseFlags bashrcDebugBuild)'
+		[app-shells/mksh]='(bashrcBaseFlags bashrcDebugBuild)'
+		[app-shells/bash]='(bashrcBaseFlags bashrcDebugBuild)'
+		[app-office/libreoffice]='(bashrcBaseFlags bashrcPlainBuild)'
+		[app-text/aspell]='(bashrcBaseFlags bashrcAMake112)'
+		[dev-db/sqlite]='(bashrcBaseFlags bashrcNoFast)'
+		[dev-db/mysql-connector-c++]='(bashrcBaseFlags bashrcNoGraphite)'
+		[dev-db/mysql]='(bashrcBaseFlags bashrcNoGraphite)'
+		[dev-db/postgresql-base]='(bashrcBaseFlags bashrcNoFast)'
+		[dev-libs/protobuf]='(bashrcBaseFlags bashrcNoFast)'
+		[dev-util/valgrind]='(bashrcBaseFlags bashrcEpUser)'
+		[dev-util/radare2]='(bashrcBaseFlags bashrcPlainBuild)'
+		[kde-base/kdelibs]='(bashrcBaseFlags bashrcNoFast)'
+		[media-gfx/digikam]='(bashrcBaseFlags bashrcDgKamFix)'
+		[media-gfx/rawstudio]='(bashrcBaseFlags bashrcNoFast)'
+		[media-libs/mesa]='(bashrcBaseFlags bashrcNoFast bashrcNoGraphite)'
+		[net-analyzer/rrdtool]='(bashrcBaseFlags bashrcNoFast)'
+		[sys-libs/glibc]='(bashrcBaseFlags bashrcDebugBuild)'
+		[sys-libs/db]='(bashrcBaseFlags bashrcNoFast)'
+		[sys-devel/llvm]='(bashrcBaseFlags bashrcNoGraphite)'
+		[www-client/phantomjs]='(bashrcBaseFlags bashrcNoFast)'
+		[www-client/chromium]='(bashrcBaseFlags bashrcNoFast)'
+		[www-client/firefox]='(bashrcBaseFlags bashrcNoGraphite)'
+	) 
+
+	bashrcRunSingleHook "$CATEGORY" "$PN" || die 'bashrc: hook failed'
+	einfo $'bashrc computed cflags:\n'"$(declare -p CFLAGS CXXFLAGS)"
+	
+	I_PROMISE_TO_SUPPLY_PATCHES_WITH_BUGS=1
+	__bashrc_Func_Tool__ cleanup || die 'bashrc: cleanup failed.'
+	unset -v QT_SELECT
+}
+
+__bashrc_Main__ "$@"
+
+# vim: set fenc=utf-8 ff=unix ft=sh ts=4 sw=4 sts=1 noet :

@@ -1,0 +1,3 @@
+# move app-emulation/virtualbox-ose-additions app-emulation/virtualbox-additions
+app-emulation/virtualbox-additions PUEL
+dev-java/sun-jdk dlj-1.1
