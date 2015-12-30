@@ -424,18 +424,18 @@ function yt {
 	elif [[ -f $file ]]; then
 		{
 			printf 'File already exists, continuing if possible: %q\n' "$file"
-			youtube-dl -f '[height <=? 720]' --no-part "$vid" &
+			youtube-dl -f '[height <=? 480]' --no-part --xattrs "$vid" &
 		} >&2
 	else
 		{
 			inotifywait -e create . 2>&1 >&3 | {
 				grep -q 'Watches established.'
-				youtube-dl -f '[height <=? 720]' --no-part "$vid" <&4 >&2
+				youtube-dl -f '[height <=? 480]' --no-part --xattrs "$vid" <&4 >&2
 			}
 		} 3>&1 | grep -q "./ CREATE $file"
 	fi 4<&0
 
-	smplayer --add-to-playlist "$file" &
+	smplayer -add-to-playlist "$file" &
 }
 
 # TODO unfinished

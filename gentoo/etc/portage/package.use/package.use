@@ -1,3 +1,20 @@
+#>=dev-qt/qtgui-4.8.7:4 -egl
+#dev-haskell/* -profile doc hoogle
+#dev-qt/qtgui:4 egl
+#media-gfx/xsane ocr
+#net-analyzer/hping tcl
+#sys-libs/gdbm berkdb
+#x11-wm/xmonad doc
+#x11-wm/xmonad-contrib doc
+*/*::dotnet developer
+=dev-python/sip-4.16.2 python_targets_python3_2 python_targets_python3_4
+=dev-python/xmpppy-0.5.0_rc1 python_targets_python3_2
+>=app-text/texlive-core-2013-r1 xetex
+>=dev-python/shiboken-1.2.2 python_targets_python3_3
+>=dev-ruby/json-1.8.0 ruby_targets_ruby20
+>=dev-ruby/rake-0.9.6 ruby_targets_ruby20
+>=dev-ruby/rubygems-2.0.3 ruby_targets_ruby20
+>=virtual/python-imaging-1 python_targets_python3_3
 app-accessibility/speech-dispatcher python_targets_python3_3
 app-admin/conky iostats hddtemp lua weather-metar weather-xoap math portmon nano-syntax -audacious
 app-admin/salt gnupg keyring 
@@ -7,6 +24,7 @@ app-backup/dar lzo dar64
 app-crypt/gnupg tools
 app-crypt/heimdal caps hdb-ldap -ssl -threads
 app-crypt/johntheripper opencl
+app-crypt/mit-krb5 openldap
 app-crypt/pinentry gtk gnome-keyring clipboard -qt4
 app-crypt/qca qt4 gcrypt nss
 app-doc/pms html
@@ -18,7 +36,7 @@ app-emulation/libvirt pcap virt-network lxc parted wireshark-plugins
 app-emulation/lxc cgmanager
 app-emulation/lxd btrfs
 app-emulation/q4wine winetriks icoutils
-app-emulation/qemu tls kqemu sdl alsa qemu-ifup virtfs ssh usbredir spice vte
+app-emulation/qemu tls kqemu sdl alsa qemu-ifup virtfs ssh usbredir spice vte lzo
 app-emulation/spice client
 app-emulation/virtualbox additions extensions -java
 app-emulation/virtualbox-bin additions chm
@@ -41,7 +59,6 @@ app-text/enchant aspell
 app-text/gocr tk
 app-text/libwpd tools
 app-text/poppler qt4
->=app-text/texlive-core-2013-r1 xetex
 app-text/texlive extra
 app-text/trang
 dev-cpp/gtkmm accessibility
@@ -50,37 +67,39 @@ dev-db/postgresql doc uuid python_single_target_python3_4 -python_single_target_
 dev-db/sqlite extensions fts3 icu threadsafe unlock-notify -secure-delete 
 dev-db/sqlitebrowser qt5 -qt4
 dev-db/virtuoso-server -kerberos
-dev-dotnet/* doc
+dev-dotnet/* doc developer
 dev-dotnet/mono-addins gtk
-dev-dotnet/nunit nupkg
 dev-dotnet/nant nupkg
+dev-dotnet/nunit nupkg
 dev-games/cegui devil
 dev-games/openscenegraph gdal glut -ffmpeg -qt4
-#dev-haskell/* -profile doc hoogle
 dev-java/icedtea -nsplugin -webstart
 dev-java/junit source
 dev-java/lucene analyzers
 dev-java/oracle-jdk-bin javafx -nsplugin
 dev-java/swing-layout source
+dev-lang/R perl
 dev-lang/ghc doc -ghcbootstrap
 dev-lang/icc ipp mkl
 dev-lang/mono -doc
 dev-lang/php sysvipc gd suhosin mysqli pcntl posix -sqlite3 -sqlite
 dev-lang/python sqlite tk examples doc sage gdbm -build
-dev-lang/R perl
 dev-lang/ruby -rdoc
-dev-lang/swig ccache
 dev-lang/swi-prolog -java
+dev-lang/swig ccache
+dev-libs/DirectFB fbcon
 dev-libs/botan -doc
 dev-libs/dbus-glib -doc
-dev-libs/DirectFB fbcon
 dev-libs/elfutils static-libs
 dev-libs/glib utils
 dev-libs/klibc -custom-cflags
+dev-libs/libappindicator -introspection
 dev-libs/libdbusmenu gtk3
+dev-libs/libgdata gnome
 dev-libs/libmirage -doc
 dev-libs/libnl utils
 dev-libs/libpcre pcre16 pcre32
+dev-libs/libpeas -python_targets_python2_7 -python_targets_python3_4
 dev-libs/libtomcrypt libtommath
 dev-libs/libxml2 doc
 dev-libs/nss utils
@@ -89,13 +108,15 @@ dev-libs/quazip -qt4
 dev-libs/xmlrpc-c libwww curl
 dev-libs/xmlsec gcrypt
 dev-libs/xqilla doc examples
-dev-python/bpython -doc
+dev-python/* -doc
 dev-python/Babel -doc
+dev-python/PyQt4 assistant declarative svg webkit X doc examples help multimedia scripttools xmlpatterns -kde
+dev-python/PyQt5 examples gles2 multimedia positioning sensors serialport websockets x11extras
+dev-python/bpython -doc
+dev-python/certifi python_targets_python3_3 
 dev-python/characteristic -doc
 dev-python/cssselect -doc
 dev-python/cython examples -doc
-dev-python/* -doc
-dev-python/certifi python_targets_python3_3 
 dev-python/docutils python_targets_python3_4
 dev-python/futures -doc
 dev-python/gevent -doc
@@ -116,11 +137,9 @@ dev-python/pbr -test
 dev-python/pexpect -doc
 dev-python/pillow python_targets_python3_3 -doc
 dev-python/py -doc
+dev-python/pyRXP examples
 dev-python/pygments -doc
 dev-python/pyopenssl -doc
-dev-python/PyQt4 assistant declarative svg webkit X doc examples help multimedia scripttools xmlpatterns -kde
-dev-python/PyQt5 examples gles2 multimedia positioning sensors serialport websockets x11extras
-dev-python/pyRXP examples
 dev-python/pyside python_targets_python3_3
 dev-python/pytest -doc
 dev-python/pyxattr -doc
@@ -128,39 +147,32 @@ dev-python/pyxml doc examples
 dev-python/pyzmq -doc
 dev-python/restkit -doc
 dev-python/setuptools python_targets_python3_3
->=dev-python/shiboken-1.2.2 python_targets_python3_3
-=dev-python/sip-4.16.2 python_targets_python3_2 python_targets_python3_4
 dev-python/six -doc
 dev-python/spyder ipython numpy scipy matplotlib
-=dev-python/xmpppy-0.5.0_rc1 python_targets_python3_2
 dev-qt/* accessibility gles2
 dev-qt/designer -phonon
 dev-qt/qt-creator autotools cmake examples fakevim valgrind
-#dev-qt/qtgui:4 egl
-#>=dev-qt/qtgui-4.8.7:4 -egl
 dev-qt/qtgui:5 evdev gles2 -opengl -gtkstyle
 dev-qt/qthelp doc compat
 dev-qt/qtmultimedia
 dev-qt/qtquickcontrols widgets
 dev-qt/qtsvg accessibility
 dev-qt/qtwebkit widgets printsupport webchannel
-dev-util/kdevplatform subversion classbrowser debug konsole reviewboard
 dev-ruby/bouncy-castle-java ruby_targets_jruby
->=dev-ruby/json-1.8.0 ruby_targets_ruby20
->=dev-ruby/rake-0.9.6 ruby_targets_ruby20
->=dev-ruby/rubygems-2.0.3 ruby_targets_ruby20
 dev-ruby/rubygems ruby_targets_jruby
 dev-scheme/racket futures jit places doc plot
 dev-util/cmake qt5 -qt4 -doc
 dev-util/codeblocks contrib
 dev-util/eric python_single_target_python3_4
 dev-util/kdevelop cvs java php sql okteta qthelp cxx clang
+dev-util/kdevplatform subversion classbrowser debug konsole reviewboard
 dev-util/ltrace unwind
-dev-util/monodevelop doc
+dev-util/monodevelop doc developer
 dev-vcs/cvs server
-dev-vcs/git-cola python_single_target_python3_4 -python_single_target_python2_7 -doc
 dev-vcs/git gtk cvs tk
+dev-vcs/git-cola python_single_target_python3_4 -python_single_target_python2_7 -doc
 dev-vcs/subversion -dso -kde perl
+ev-libs/libdbusmenu -introspection
 games-emulation/bsnes -gtk snesfilter
 games-emulation/bsnes-phoenix -gtk
 games-emulation/higan profile_accuracy profile_performance profile_balanced
@@ -208,8 +220,8 @@ media-gfx/krita vc
 media-gfx/luminance-hdr doc
 media-gfx/pfstmo fftw
 media-gfx/pfstools raw openexr imagemagick glut gdal netpbm
+media-gfx/sane-backends cannon_pp
 media-gfx/ufraw exif contrast gtk hotpixels
-media-gfs/sane-backends cannon_pp
 media-libs/allegro dumb
 media-libs/fontconfig -cleartype
 media-libs/freetype -cleartype kpathsea -infinality
@@ -223,7 +235,7 @@ media-libs/libvpx -doc
 media-libs/libwmf xml -expat
 media-libs/mesa vdpau g3dvl gbm openvg dri3 r600-llvm-compiler llvm opencl xvmc xa wayland osmesa gles2 -classic 
 media-libs/mlt melt frei0r kdenlive -qt4 -kde
-media-libs/opencv -qt4
+media-libs/opencv contrib  -qt4
 media-libs/phonon gstreamer -vlc
 media-libs/swfdec gtk
 media-libs/vigra -python
@@ -238,19 +250,18 @@ media-sound/qtractor rubberband
 media-video/ffmpeg xvid schroedinger opencore-amr network vpx dirac opus quvi -samba
 media-video/kmplayer npp
 media-video/minitube gstreamer kde
-media-video/mplayer2 -quvi
 media-video/mplayer bidi opencore-amr dirac -cdparanoia -gtk
+media-video/mplayer2 -quvi
 media-video/mpv bidi libmpv drm ladspa
 media-video/smplayer -qt4 streaming
 media-video/vlc aalib cddax dirac rtsp fbcon opengl x264 bidi v4l v4l2 libv4l2 vlm xosd win32codecs dvd ffmpeg mpeg mad aac dts a52 ogg flac theora ogg vorbis matroska freetype bidi xv svga gnutls stream vlm cdda vcd live cddb dvb upnp schroedinger postproc qt5 -nsplugin -samba -httpd -qt4 -skins -opencv
 net-analyzer/ettercap gtk
-#net-analyzer/hping tcl
 net-analyzer/metasploit gtk httpd sqlite
 net-analyzer/nmap gtk nmap-update nping ncat ndiff zenmap
 net-analyzer/scapy gnuplot graphviz 
 net-analyzer/snort large-pcap-64bit linux-smp-stats shared-rep control-socket file-inspect
 net-analyzer/tcpdump chroot
-net-analyzer/wireshark qt5 gtk3 adns gnutls gcrypt kerberos smi zlib doc doc-pdf -gtk -gtk2 -qt4
+net-analyzer/wireshark qt5 gtk3 adns gnutls gcrypt kerberos smi zlib -doc -doc-pdf -gtk -gtk2 -qt4
 net-dns/avahi autoipd qt4 mdnsresponder-compat howl-compat gtk3 gtk
 net-dns/bind berkdb dlz gssapi
 net-dns/bind-tools gssapi
@@ -259,15 +270,17 @@ net-dns/libidn -mono
 net-firewall/ipset -modules
 net-fs/cifs-utils ads creds upcall acl
 net-fs/nfs-utils -kerberos
-net-fs/samba-libs smbclient
 net-fs/samba readline pam swat automount kerberos winbind doc ads addns aio client system-mitkrb5 -cluster 
+net-fs/samba-libs smbclient
 net-fs/samba-server swat
 net-im/pidgin gtk
 net-im/telepathy-connection-managers msn sip sipe steam yahoo
 net-irc/kvirc qt4
 net-libs/glib-networking ssl
 net-libs/gnutls pkcs11 dane
+net-libs/gssdp -introspection
 net-libs/gtk-vnc gtk3
+net-libs/gupnp -introspection
 net-libs/libinfinity gtk server
 net-libs/libproxy -kde
 net-libs/libqmi -doc
@@ -277,17 +290,18 @@ net-libs/nghttp2 hpack-tools utils
 net-libs/telepathy-qt farstream
 net-libs/webkit-gtk -doc
 net-libs/xulrunner java -qt4
-net-misc/curl ssh metalink -adns
+net-misc/curl ssh -adns
 net-misc/livestreamer -doc
 net-misc/networkmanager gnutls dhclient -nss -dhcpcd
 net-misc/ntp caps
 net-misc/nxserver-freenx nxclient rdesktop vnc
 net-misc/openssh sctp ldns skey libedit -ldap
 net-misc/scponly scp winscp passwd
+net-misc/spice-gtk -python_single_target_python3_4 python_single_target_python2_7
 net-misc/spice-gtk gtk3 usbredir
 net-misc/tigervnc server
 net-misc/tor stats
-net-nds/openldap -kerberos
+net-nds/openldap smbkrb5passwd -libressl -kerberos
 net-p2p/fms frost
 net-p2p/ktorrent rss webinterface
 net-print/cups X jpeg nls png tiff -usb -zeroconf
@@ -331,7 +345,6 @@ sys-fs/udev -doc
 sys-fs/udev extras -firmware-loader
 sys-kernel/zen-sources -stable
 sys-libs/db java
-#sys-libs/gdbm berkdb
 sys-libs/glibc nptlonly glibc-omitfp
 sys-libs/libunwind debug-frame
 sys-libs/zlib minizip
@@ -340,7 +353,6 @@ sys-process/lsof rpc
 sys-process/procps modern-top
 virtual/mpi romio
 virtual/poppler lcms
->=virtual/python-imaging-1 python_targets_python3_3
 virtual/python-imaging -python_targets_python3_2 -python_targets_python3_3
 virtual/python-json external
 www-client/chromium system-v8 custom-cflags -gecko-mediaplayer
@@ -352,24 +364,23 @@ www-plugins/adobe-flash -32bit
 www-plugins/gnash agg ssh gtk
 www-plugins/moonlight sdk
 www-plugins/mplayerplug-in divx wmp realmedia
-www-servers/tornado -doc
 www-servers/nginx aio pcre-jit
+www-servers/tornado -doc
 x11-apps/copyq -qt4
-x11-base/xorg-server xvfb -kdrive 
-x11-libs/cairo glitz svg X lcdfilter tee xcb -cleartype 
+x11-base/xorg-server xvfb -kdrive
+x11-libs/cairo glitz svg X lcdfilter tee xcb -cleartype
+x11-libs/libXft -cleartype
 x11-libs/libdrm libkms
 x11-libs/libxcb xkb
-x11-libs/libXft -cleartype
 x11-libs/libxklavier -doc
 x11-libs/qtermwidget -qt4
 x11-libs/qtscriptgenerator -kde
+x11-libs/vte -glade
 x11-libs/wxGTK unicode X -odbc
 x11-misc/xmobar examples
 x11-misc/xmonad-extras volume
-x11-terms/rxvt-unicode 256-color iso14755 wcwidth xterm-color -vanilla -perl
 x11-terms/qterminal -qt4
+x11-terms/rxvt-unicode 256-color iso14755 wcwidth xterm-color -vanilla -perl
 x11-themes/gentoo-artwork offensive
 x11-themes/gtk-engines-murrine themes
-#x11-wm/xmonad-contrib doc
-#x11-wm/xmonad doc
 x11-wm/xpra server ssh sound

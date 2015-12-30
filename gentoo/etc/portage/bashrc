@@ -31,15 +31,16 @@ function __bashrc_Funcs__ {
 			[dev-python]='([pyxattr]=bashrcNoError [matplotlib]=bashrcNoGraphite)'
 			[dev-util]='([valgrind]=bashrcEpUser [radare2]=bashrcPlainBuild)'
 			[dev-qt]='([qtcore]=xbashrcNoFast [qtgui]=bashrcNoGraphite [qtwidgets]=bashrcNoGraphite)'
+			[gnome-extra]='([libgda]=bashrcNoFast)'
 			[kde-apps]='([okular]=bashrcNoError [kpat]=bashrcNoGraphite)'
 			[kde-base]='([kdelibs]=bashrcKdeLibs)'
 			[kde-frameworks]='([kjs]=bashrcPlainBuild)'
 			[media-gfx]='([digikam]=bashrcDgKamFix [rawstudio]=bashrcNoFast [sane-backends]=bashrcNoGraphite [fontforge]=bashrcNoGraphite [graphviz]=bashrcNoGraphite)'
-			[media-libs]='([xine-lib]=bashrcNoGraphite [libraw]=bashrcNoGraphite [aalib]=bashrcNoGraphite [x264]=bashrcNoGraphite [opencv]=bashrcNoGraphite [gst-plugins-good]=bashrcNoGraphite [gst-plugins-bad]=bashrcNoGraphite [opus]=bashrcPlainBuild)'
+			[media-libs]='([xine-lib]=bashrcNoGraphite [libraw]=bashrcNoGraphite [aalib]=bashrcNoGraphite [x264]=bashrcNoGraphite [opencv]=bashrcNoGraphite [gst-plugins-good]=bashrcNoGraphite [gst-plugins-bad]=bashrcNoGraphite [opus]=bashrcPlainBuild [libvpx]=bashrcNoGraphite)'
 			[media-sound]='([timidity++]=bashrcNoGraphite)'
 			[media-video]='([ffmpeg]=bashrcNoGraphite)'
 			[net-analyzer]='([rrdtool]=bashrcNoFast [nmap]=bashrcNoGraphite)'
-			[net-misc]='([openssh]=bashrcDebugBuild [mosh]=bashrcStd++14)'
+			[net-misc]='([openssh]=bashrcDebugBuild)'
 			[net-proxy]='([polipo]=bashrcDebugBuild)'
 			[sci-libs]='([scipy]=bashrcNoGraphite [gdal]=bashrcNoGraphite)'
 			[sys-apps]='([coreutils]=bashrcDebugBuild [findutils]=bashrcDebugBuild [util-linux]=bashrcDebugBuild)'
@@ -68,14 +69,14 @@ function __bashrc_Funcs__ {
 				bashrcSetupFlags flags "${OVERRIDE_FLAGS[@]}"
 				einfo "bashrc: No hook function defined for ${1}/${2} -- used user-defined OVERRIDE_FLAGS. :)"
 			else
-				if bashrcIsClang; then
-					einfo 'bashrc: Looks like this is clang. Omitting graphite flags.'
-					bashrcSetupFlags flags base || die 'bashrcSetupFlags failed' # No graphite flags
-				else
-					bashrcSetupFlags flags base graphite || die 'bashrcSetupFlags failed.'
-				fi
-
 				einfo "bashrc: No hook function defined for ${1}/${2} -- used default flag groups. :)"
+			fi
+
+			if bashrcIsClang; then
+				einfo 'bashrc: Looks like this is clang. Omitting graphite flags.'
+				unset -v flags\[{-floop-interchange,-floop-strip-mine,-floop-block}\]
+			else
+				bashrcSetupFlags flags base graphite || die 'bashrcSetupFlags failed.'
 			fi
 		fi
 
@@ -220,7 +221,7 @@ function __bashrc_Funcs__ {
 			append-flags "-fplugin=/usr/$(get_libdir)/llvm/dragonegg.so" -fplugin-arg-dragonegg-enable-gcc-optzns
 			einfo "${FUNCNAME}: applied - $_"
 
-			local x srcdir=/home/smorg/doc/programs/ast-open
+			local x srcdir=~ormaaj/doc/programs/ast-open
 			pushd "$srcdir"
 			addwrite "$srcdir"
 			git checkout 2012-05-15

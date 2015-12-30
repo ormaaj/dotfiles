@@ -16,7 +16,7 @@ function setupLinux {
 		PROMPT_COMMAND='history -a'
 
 	export \
-		PATH=/home/smorg/doc/projects/bash/scripts:${PATH} \
+		PATH=/home/ormaaj/doc/projects/bash/scripts:${PATH} \
 		PAGER=vimpager \
 		MANPAGER=vimmanpager \
 		BROWSER=chromium-browser-live

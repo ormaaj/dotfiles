@@ -1,6 +1,5 @@
 app-admin/apache-tools
 app-admin/cgmanager
-app-admin/conky
 app-admin/eselect
 app-admin/haskell-updater
 app-admin/hddtemp
@@ -34,6 +33,7 @@ app-arch/xar
 app-arch/zip
 app-backup/dar
 app-backup/fsarchiver
+app-backup/snapper
 app-backup/tarsnap
 app-benchmarks/bonnie++
 app-benchmarks/i7z
@@ -98,6 +98,7 @@ app-misc/clockywock
 app-misc/dtach
 app-misc/dvtm
 app-misc/empty
+app-misc/fdupes
 app-misc/golly
 app-misc/pax-utils
 app-misc/resolve-march-native
@@ -208,6 +209,7 @@ dev-haskell/ztail
 dev-java/antlr:3
 dev-java/antlr:4
 dev-java/icedtea
+dev-java/icedtea-bin
 dev-java/icedtea-web:0
 dev-java/oracle-jdk-bin
 dev-lang/fsharp
@@ -234,7 +236,6 @@ dev-python/git-python
 dev-python/html5lib
 dev-python/ipdb
 dev-python/ipython
-dev-python/irc
 dev-python/jedi
 dev-python/logilab-constraint
 dev-python/markdown
@@ -246,6 +247,7 @@ dev-python/pygame
 dev-python/pygments
 dev-python/pygraphviz
 dev-python/pyodbc
+dev-python/pypax
 dev-python/pyprof2calltree
 dev-python/python-docs
 dev-python/python-docs:2.7
@@ -262,6 +264,7 @@ dev-python/wsgiproxy2
 dev-python/xmpppy
 dev-qt/qdbus
 dev-qt/qdbusviewer
+dev-util/anjuta
 dev-util/argouml
 dev-util/astyle
 dev-util/beediff
@@ -324,7 +327,9 @@ games-util/joystick
 games-util/qjoypad
 gnome-extra/zenity
 kde-apps/kdebase-runtime-meta:5
+kde-apps/kdepim-meta:5
 kde-apps/thumbnailers:5
+kde-misc/skanlite:5
 kde-plasma/plasma-meta
 media-fonts/arkpandora
 media-fonts/arphicfonts
@@ -374,6 +379,7 @@ media-gfx/openexr_viewers
 media-gfx/potrace
 media-gfx/rawtherapee
 media-gfx/sam2p
+media-gfx/sane-frontends
 media-gfx/ufraw
 media-gfx/uniconvertor
 media-libs/allegro
@@ -435,7 +441,6 @@ net-misc/ifenslave
 net-misc/keychain
 net-misc/livestreamer
 net-misc/lksctp-tools
-net-misc/mosh
 net-misc/netkit-fingerd
 net-misc/netkit-telnetd
 net-misc/netsed
@@ -530,6 +535,7 @@ sys-fs/aufs-util
 sys-fs/btrfs-progs
 sys-fs/ddrescue
 sys-fs/dosfstools
+sys-fs/duperemove
 sys-fs/fuse
 sys-fs/inotify-tools
 sys-fs/mtd-utils
@@ -591,6 +597,8 @@ x11-base/xorg-server
 x11-drivers/xf86-input-evdev
 x11-drivers/xf86-video-ati
 x11-libs/libxshmfence
+x11-libs/vte
+x11-libs/vte:2.90
 x11-misc/compton
 x11-misc/dmenu
 x11-misc/driconf
@@ -616,7 +624,6 @@ x11-proto/dri3proto
 x11-proto/presentproto
 x11-terms/qterminal
 x11-terms/rxvt-unicode
-x11-terms/xfce4-terminal
 x11-terms/xterm
 x11-themes/gentoo-artwork
 x11-themes/gentoo-xcursors

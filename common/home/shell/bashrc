@@ -1,5 +1,7 @@
 [[ $- == *i* ]] || return
+
 shopt -s extglob lastpipe expand_aliases
+unalias -a
 alias \
 	nameref='typeset -n' \
 	integer='typeset -i' \
@@ -137,7 +139,7 @@ function main {
 		shopt -s expand_aliases
 
 		alias \
-			ls='command ls --color=auto --group-directories-first --classify' \
+			ls='command ls -h --color=auto --group-directories-first --classify' \
 			grep='command grep --color=auto' \
 			tree='command tree -ugphD'
 	}

@@ -38,6 +38,7 @@ dev-lang/python **
 dev-libs/grantlee **
 dev-libs/serd **
 dev-libs/sord **
+dev-libs/libgdata **
 =dev-libs/extra-cmake-modules-9999 **
 dev-python/pyRXP **
 dev-python/rfc3339 **
@@ -52,8 +53,9 @@ dev-util/kdevelop-clang **
 #dev-util/kdevelop-pg-qt **
 #dev-util/kdevelop-python **
 #dev-util/kdevplatform **
+dev-util/kdevelop-upload **
 dev-util/kxsldbg **
-dev-util/monodevelop **
+#dev-util/monodevelop **
 dev-util/mono-tools **
 dev-util/radare2 **
 <dev-vcs/git-9999 **
@@ -138,9 +140,10 @@ media-libs/raptor **
 media-libs/raul **
 media-libs/sratom **
 media-libs/suil **
+media-libs/virglrenderer **
 media-plugins/mda-lv2 **
 media-plugins/omins **
-#media-sound/amarok **
+media-sound/amarok **
 media-sound/ardour **
 media-sound/drobilla **
 media-sound/ingen **
@@ -173,9 +176,7 @@ sys-apps/superiotool **
 sys-auth/pambase **
 sys-boot/grub **
 #sys-devel/dragonegg **
-sys-devel/clang **
 sys-devel/gcc **
-sys-devel/llvm **
 <sys-fs/udev-9999 **
 www-client/chromium **
 www-client/firefox **

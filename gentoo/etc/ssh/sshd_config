@@ -10,6 +10,7 @@ LogLevel VERBOSE
 #LogLevel DEBUG
 LoginGraceTime 1m
 PermitRootLogin prohibit-password
+#PermitRootLogin yes
 StrictModes yes
 PermitEmptyPasswords no
 AuthorizedKeysFile .ssh/authorized_keys

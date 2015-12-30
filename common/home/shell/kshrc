@@ -1,7 +1,7 @@
 [[ $- != *i* ]] && return
 stty -ixon
 
-export PATH="/home/smorg/doc/projects/bash/scripts:$PATH" MANPAGER=vimmanpager HTMLPAGER=chromium-browser
+export PATH="/home/ormaaj/doc/projects/bash/scripts:$PATH" MANPAGER=vimmanpager HTMLPAGER=chromium-browser
 
 unset LC_ALL PYTHONPATH
 umask 0027
@@ -171,7 +171,7 @@ function trayr {
 }
 
 function vimr {
-    vim --servername smorg --remote "$@"
+    vim --servername ormaaj --remote "$@"
 }
 
 function weechat {

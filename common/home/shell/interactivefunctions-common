@@ -52,10 +52,10 @@ function sprunge {
 }
 
 # Some ssh presets to use when match and host directives would be impractical
-function sshPresets {
+function sshpresets {
 	typeset host
 	for host; do
-		case $1 in
+		case $host in
 			anapnea.net)
 				ssh -vfNTD 9090 -L 9091:localhost:9050 -p 443 ormaaj@anapnea.net
 				;;
@@ -77,14 +77,6 @@ function rmvtp {
 	shopt -s nullglob
 	rm -rf -- /var/tmp/portage/*
 	shopt -u nullglob
-}
-
-function ls {
-	command ls --color=auto --group-directories-first --classify "$@"
-}
-
-function grep {
-	command grep --color=auto "$@"
 }
 
 # Quickly adds world read permissions to files and world read/write permissions
@@ -137,3 +129,11 @@ function vimr {
 }
 
 # vim: set fenc=utf-8 ff=unix ft=sh ts=4 sts=4 sw=4 noet :
+function ls {
+	command ls --color=auto --group-directories-first --classify "$@"
+}
+
+function grep {
+	command grep --color=auto "$@"
+}
+

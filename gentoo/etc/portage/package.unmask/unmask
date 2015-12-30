@@ -66,7 +66,6 @@ sys-devel/dragonegg
 sys-devel/gcc:4.9
 sys-kernel/zen-sources
 virtual/jdk
-www-client/chromium
 www-client/firefox
 www-client/opera
 www-client/xxxterm

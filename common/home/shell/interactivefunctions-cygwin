@@ -60,7 +60,7 @@ function autossh-wrapper {
 	if [[ $autossh_host_default == !()@!() ]]; then
 		# Loop probably unnecessary, but it doesn't hurt.
 		while :; do
-			autossh -M 1234 -nNTR 3333:localhost:4114 -R 3390:localhost:3389 smorg@ormaaj.org
+			autossh -M 1234 -nNTR 3333:localhost:4114 -R 3390:localhost:3389 ormaaj@ormaaj.org
 			sleep 30
 		done
 	else
