@@ -2,6 +2,7 @@ PARTLABEL=boot          /boot vfat              noauto,noatime 0 2
 PARTLABEL=grub          /boot/efi               vfat noauto,noatime 0 2
 LABEL=ormaaj-btrfs      /                       btrfs defaults,noatime,space_cache,autodefrag,acl,compress=lzo 0 1
 LABEL=ormaaj-btrfs      /home/ormaaj/doc        btrfs defaults,noatime,space_cache,autodefrag,acl,compress=lzo,subvol=/home/ormaaj.doc 0 1
+LABEL=ormaaj-btrfs      /home/ormaaj/doc/media  btrfs defaults,noatime,space_cache,autodefrag,acl,compress=lzo,subvol=/mediafiles 0 1
 LABEL=ormaaj-btrfs      /usr/portage            btrfs defaults,noatime,space_cache,autodefrag,acl,compress=lzo,subvol=/portage 0 1
 LABEL=ormaaj-btrfs      /usr/portage/distfiles  btrfs defaults,noatime,space_cache,autodefrag,acl,compress=no,subvol=/distfiles 0 1
 LABEL=ormaaj-backup     /mnt/backup             btrfs defaults,noatime,space_cache,autodefrag,acl,compress=zlib 0 1
