@@ -1,21 +1,7 @@
-#>=dev-qt/qtgui-4.8.7:4 -egl
 #dev-haskell/* -profile doc hoogle
-#dev-qt/qtgui:4 egl
-#media-gfx/xsane ocr
-#net-analyzer/hping tcl
-#sys-libs/gdbm berkdb
 #x11-wm/xmonad doc
 #x11-wm/xmonad-contrib doc
 */*::dotnet developer
-=dev-python/sip-4.16.2 python_targets_python3_2 python_targets_python3_4
-=dev-python/xmpppy-0.5.0_rc1 python_targets_python3_2
->=app-text/texlive-core-2013-r1 xetex
->=dev-python/shiboken-1.2.2 python_targets_python3_3
->=dev-ruby/json-1.8.0 ruby_targets_ruby20
->=dev-ruby/rake-0.9.6 ruby_targets_ruby20
->=dev-ruby/rubygems-2.0.3 ruby_targets_ruby20
->=virtual/python-imaging-1 python_targets_python3_3
-app-accessibility/speech-dispatcher python_targets_python3_3
 app-admin/conky iostats hddtemp lua weather-metar weather-xoap math portmon nano-syntax -audacious
 app-admin/salt gnupg keyring 
 app-admin/sudo -skey
@@ -32,11 +18,12 @@ app-editors/bluefish gucharmap
 app-editors/cssed plugins
 app-editors/gvim gtk cscope netbeans
 app-editors/vim vim-with-x bash-completion vim-pager cscope
+app-emulation/libguestfs inspect-icons
 app-emulation/libvirt pcap virt-network lxc parted wireshark-plugins
 app-emulation/lxc cgmanager
 app-emulation/lxd btrfs
 app-emulation/q4wine winetriks icoutils
-app-emulation/qemu tls kqemu sdl alsa qemu-ifup virtfs ssh usbredir spice vte lzo
+app-emulation/qemu tls kqemu sdl alsa qemu-ifup virtfs ssh usbredir spice vte lzo snappy
 app-emulation/spice client
 app-emulation/virtualbox additions extensions -java
 app-emulation/virtualbox-bin additions chm
@@ -60,6 +47,7 @@ app-text/gocr tk
 app-text/libwpd tools
 app-text/poppler qt4
 app-text/texlive extra
+app-text/texlive-core xetex
 app-text/trang
 dev-cpp/gtkmm accessibility
 dev-db/mysql client-libs
@@ -73,6 +61,7 @@ dev-dotnet/nant nupkg
 dev-dotnet/nunit nupkg
 dev-games/cegui devil
 dev-games/openscenegraph gdal glut -ffmpeg -qt4
+dev-haskell/highlighting-kate doc executable hoogle
 dev-java/icedtea -nsplugin -webstart
 dev-java/junit source
 dev-java/lucene analyzers
@@ -169,7 +158,7 @@ dev-util/kdevplatform subversion classbrowser debug konsole reviewboard
 dev-util/ltrace unwind
 dev-util/monodevelop doc developer
 dev-vcs/cvs server
-dev-vcs/git gtk cvs tk
+dev-vcs/git gtk cvs tk highlight
 dev-vcs/git-cola python_single_target_python3_4 -python_single_target_python2_7 -doc
 dev-vcs/subversion -dso -kde perl
 ev-libs/libdbusmenu -introspection
@@ -180,9 +169,8 @@ games-emulation/mupen64plus plugins
 games-emulation/ps2emu-zzogl shaders
 games-simulation/flightgear fgcom
 games-strategy/hedgewars server
-gnome-base/gnome-vfs -doc
-gnome-base/gnome-vfs -samba
-gnome-base/gvfs gdu -samba
+gnome-base/gnome-vfs -doc -abi_x86_32 #-samba
+gnome-base/gvfs gdu #-samba
 kde-apps/cantor -R
 kde-apps/dolphin thumbnail
 kde-apps/kdepim google
@@ -235,11 +223,11 @@ media-libs/libvpx -doc
 media-libs/libwmf xml -expat
 media-libs/mesa vdpau g3dvl gbm openvg dri3 r600-llvm-compiler llvm opencl xvmc xa wayland osmesa gles2 -classic 
 media-libs/mlt melt frei0r kdenlive -qt4 -kde
-media-libs/opencv contrib  -qt4
+media-libs/opencv contrib -java -qt4
 media-libs/phonon gstreamer -vlc
 media-libs/swfdec gtk
 media-libs/vigra -python
-media-libs/xine-lib -samba # Apparently fails with samba 4 currently
+media-libs/xine-lib #-samba # Apparently fails with samba 4 currently
 media-plugins/alsa-plugins -pulseaudio
 media-plugins/frei0r-plugins scale0tilt doc -facedetect
 media-plugins/kipi-plugins expoblending panorama -cdr
@@ -254,7 +242,7 @@ media-video/mplayer bidi opencore-amr dirac -cdparanoia -gtk
 media-video/mplayer2 -quvi
 media-video/mpv bidi libmpv drm ladspa
 media-video/smplayer -qt4 streaming
-media-video/vlc aalib cddax dirac rtsp fbcon opengl x264 bidi v4l v4l2 libv4l2 vlm xosd win32codecs dvd ffmpeg mpeg mad aac dts a52 ogg flac theora ogg vorbis matroska freetype bidi xv svga gnutls stream vlm cdda vcd live cddb dvb upnp schroedinger postproc qt5 -nsplugin -samba -httpd -qt4 -skins -opencv
+media-video/vlc aalib cddax dirac rtsp fbcon opengl x264 bidi v4l v4l2 libv4l2 vlm xosd win32codecs dvd ffmpeg mpeg mad aac dts a52 ogg flac theora ogg vorbis matroska freetype bidi xv svga gnutls stream vlm cdda vcd live cddb dvb upnp schroedinger postproc qt5 -nsplugin -httpd -qt4 -skins -opencv #-samba
 net-analyzer/ettercap gtk
 net-analyzer/metasploit gtk httpd sqlite
 net-analyzer/nmap gtk nmap-update nping ncat ndiff zenmap
@@ -297,8 +285,7 @@ net-misc/ntp caps
 net-misc/nxserver-freenx nxclient rdesktop vnc
 net-misc/openssh sctp ldns skey libedit -ldap
 net-misc/scponly scp winscp passwd
-net-misc/spice-gtk -python_single_target_python3_4 python_single_target_python2_7
-net-misc/spice-gtk gtk3 usbredir
+net-misc/spice-gtk gtk3 usbredir -python_single_target_python3_4 python_single_target_python2_7
 net-misc/tigervnc server
 net-misc/tor stats
 net-nds/openldap smbkrb5passwd -libressl -kerberos
@@ -341,8 +328,7 @@ sys-devel/gdb python
 sys-devel/llvm gold clang libedit lldb -doc -ocaml
 sys-fs/aufs2 inotify kernel-patch
 sys-fs/ntfs3g suid ntfsprogs
-sys-fs/udev -doc
-sys-fs/udev extras -firmware-loader
+sys-fs/udev extras -firmware-loader -doc
 sys-kernel/zen-sources -stable
 sys-libs/db java
 sys-libs/glibc nptlonly glibc-omitfp

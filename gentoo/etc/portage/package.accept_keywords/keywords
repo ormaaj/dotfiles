@@ -1,9 +1,9 @@
 =app-doc/pms-9999 **
 app-editors/kile **
 app-editors/qxmledit **
-#app-emulation/libvirt **
+app-emulation/libvirt **
 app-emulation/q4wine **
-<app-emulation/qemu-9999 **
+app-emulation/qemu **
 app-emulation/virt-manager **
 app-emulation/wine **
 app-emulation/winetricks **
@@ -42,6 +42,7 @@ dev-libs/libgdata **
 =dev-libs/extra-cmake-modules-9999 **
 dev-python/pyRXP **
 dev-python/rfc3339 **
+dev-python/libvirt-python **
 #dev-python/setuptools **
 dev-scheme/racket **
 dev-util/chromium-tools **
