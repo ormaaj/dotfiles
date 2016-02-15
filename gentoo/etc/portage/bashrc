@@ -3,10 +3,28 @@
 # Dan Douglas <d@ndougl.as>
 
 [[ $EBUILD_PHASE != setup ]] && return
+#typeset -a bashrcInitialFunctions
+#compgen -A function | mapfile -t bashrcInitialFunctions
 
 # Declare bashrc functions.
 # Always call `__bashrc_Func_Tool__ collisioncheck` first!
 function __bashrc_Funcs__ {
+	# True if all args are valid names
+	function checkValidNames {
+		${1:+\:} return 1
+		typeset name
+		for name; do
+			[[ $name == [[:alpha:]_]*([[:alnum:]_]) ]] || return
+		done
+	}
+
+	# Create an associative array with keys filled from the given array
+	function arrayToSet {
+		checkValidNames "$1" "$2" || return
+		typeset -n pIn=$1 pOut=$2
+		eval "$(printf 'pOut[%q]= ' "${pIn[@]}")"
+	}
+
 	# Set up the initial associative array of CFLAGS and CXXFLAGS. 
 	# Takes an array name to assign and optionally the names of "flag groups" to include.
 	# bashrcSetupFlags arrname groupname [ groupname ... ]
@@ -16,25 +34,28 @@ function __bashrc_Funcs__ {
 			return 1
 		else
 			typeset -n __groupArray=$1
+			typeset nprocs
+			nprocs=$(getconf _NPROCESSORS_ONLN) || nprocs=16
+			
 			# Base CFLAG groups
 			typeset -A groups=(
-				[base]='(-march=native -Ofast -fstack-protector -pipe)'
-				[graphite]='(-floop-interchange -floop-strip-mine -floop-block)'
+				[base]='(-march=native -Ofast -ftree-vectorize -fno-stack-protector -pipe)'
+				[graphite]='(-floop-interchange -floop-strip-mine -floop-block -fgraphite-identity)'
 				[debug]='(-ggdb)'
 				[prof]='(-p)'
 				[spstrong]='(-fstack-protector-strong)'
-				[lto]='(-flto=16)'
+				[lto]='(-flto -fuse-linker-plugin)'
 			)
 
 			typeset x
 			typeset -a y
 			for x in "${@:2}"; do
-				if ${groups[$x]:+'false'}; then
+				if [[ ! -v groups[$x] ]]; then
 					eerror "${FUNCNAME}: Invalid flag group name: ${x}"
 					return 1
 				else
 					eval "y=${groups[$x]}"
-					eval "$(printf '__groupArray[%q]= ' "${y[@]}")"
+					arrayToSet y __groupArray
 				fi
 			done
 		fi
@@ -42,7 +63,26 @@ function __bashrc_Funcs__ {
 
 	# Usage: bashrcRunHooks "hookMap[$CATEGORY/$PN]"
 	function bashrcRunHooks {
-		typeset -A flags
+		set -x; trap 'trap RETURN; set +x' RETURN
+		typeset -A flags ldflags
+		typeset -a baseFlagGroups
+		typeset nprocs lto
+		nprocs=$(getconf _NPROCESSORS_ONLN) || nprocs=16
+
+		typeset -a Wl=(
+			-O1
+			--as-needed
+			--sort-common
+			--hash-style=gnu
+		)
+
+		if bashrcIsClang; then
+			einfo 'bashrc: Looks like this is clang!'
+			baseFlagGroups=(base lto debug)
+		else
+			baseFlagGroups=(base graphite lto debug)
+		fi
+
 		if [[ -v $1 ]] &&
 			typeset -n __ref=$1 &&
 			typeset -a "__hooks=${__ref}" &&
@@ -50,9 +90,17 @@ function __bashrc_Funcs__ {
 		then
 			typeset hook
 			for hook in "${__hooks[@]}"; do  
-				typeset -f "$hook" >/dev/null 2>&1 || continue
-				einfo "bashrc: running hook: ${hook}"
-				if "$hook"; then
+				if ! typeset -f "$hook" >/dev/null 2>&1; then
+					eerror "bashrc: Package specified a non-existing hook function: ${hook}"
+					return 1
+				elif einfo "bashrc: running hook: ${hook}"
+					bashrcSetupFlags flags "${baseFlagGroups[@]}" || die 'bashrc: bashrcSetupFlags failed.'
+					# All hooks must expect to receive `flags` as a first parameter.
+					if ! "$hook" flags; then
+						eerror "bashrc: hook function: ${hook} returned nonzero."
+						return 1
+					fi
+				then
 					einfo "bashrc: Hook function: ${hook} -- finished successfully. :)"
 				else
 					ewarn "bashrc: Hook ${hook} -- failed with status $?. :("
@@ -65,25 +113,42 @@ function __bashrc_Funcs__ {
 			bashrcSetupFlags flags "${overrideGroups[@]}" || die 'bashrcSetupFlags failed.'
 			einfo "bashrc: No hook function defined for $1 -- used user-defined OVERRIDE_FLAG_GROUPS. :)"
 		else
-			bashrcSetupFlags flags base graphite debug || die 'bashrcSetupFlags failed.'
+			bashrcSetupFlags flags "${baseFlagGroups[@]}" || die 'bashrc: bashrcSetupFlags failed.'
 			einfo "bashrc: No hook function defined for $1 -- used default flag groups. :)"
 		fi
 
+		[[ -v flags[-flto] ]] && lto=
 		if bashrcIsClang; then
-			ewarn 'bashrc: Looks like this is clang. Stripping graphite flags...'
-			unset -v flags\[{-floop-interchange,-floop-strip-mine,-floop-block}\]
+			if [[ -v lto ]]; then
+				unset -v flags\[-fuse-linker-plugin\]
+				#Wl+=('-plugin=/usr/lib/LLVMgold.so')
+				#export \
+				#	AR=/usr/local/bin/clang-ar \
+				#	RANLIB=: \
+				#	NM='nm --plugin /usr/lib/LLVMgold.so'
+				export AR=/usr/bin/llvm-ar RANLIB=/usr/bin/llvm-ranlib NM=/usr/bin/llvm-nm
+			fi
+		else
+			if [[ -v lto ]]; then
+				unset -v 'flags[-flto]'
+				flags[-flto=$nprocs]=
+			fi
+			export AR=gcc-ar NM=gcc-nm RANLIB=gcc-ranlib
 		fi
-
-		export "CFLAGS=${!flags[*]}"  "CXXFLAGS=${!flags[*]}" 
+		
+		export CFLAGS=${!flags[*]} CXXFLAGS=${!flags[*]}
+		arrayToSet Wl ldflags || return
+		typeset IFS=, 
+		export LDFLAGS; LDFLAGS="-Wl,${!ldflags[*]}${lto+ "${!flags[@]}"}"
 	}
 
+	# Test whether this is clang
 	function bashrcIsClang {
 		set C{C,XX,PP}
 		typeset -n __varname
 		for __varname; do
 			[[ $__varname == *clang* ]] && return
 		done
-
 		return 1
 	}
 
@@ -91,109 +156,104 @@ function __bashrc_Funcs__ {
 	# All package hooks below
 	#########
 
-	function bashrcBaseFlags {
-		bashrcSetupFlags flags base graphite debug || return
+	function bashrcStd++14 {
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			_ref[-std=gnu++14]=
 	}
 
-	function bashrcStd++14 {
-		bashrcBaseFlags || return
-		flags[-std=gnu++14]=
+	function bashrcMakeoptsJ1 {
+		export MAKEOPTS=-j1
+	}
+
+	function bashrcFdLimit {
+		ulimit -n 1000000
+	}
+	
+	function bashrcNoDebug {
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			unset -v '_ref[-ggdb]'
 	}
 
 	# s/-Ofast/-O3/
 	function bashrcNoFast {
-		unset -v 'flags[-Ofast]'
-		flags[-O3]=
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			unset -v '_ref[-Ofast]' &&
+			_ref[-O3]=
 	}
 
 	function bashrcNoGraphite {
-		bashrcBaseFlags || return
-		unset -v flags\[{-floop-interchange,-floop-strip-mine,-floop-block}\]
-	}
-
-	# s/-Ofast/-O2/
-	function bashrcPlainBuild {
-		bashrcNoGraphite || return
-		unset -v 'flags[-Ofast]'
-		flags[-O3]=
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			unset -v _ref\[-{floop-interchange,floop-strip-mine,floop-block,fgraphite-identity}\]
 	}
 
 	function bashrcNoError {
-		bashrcBaseFlags || return
-		flags['-Wno-error']=
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			_ref[-Wno-error]=
+	}
+	
+	function bashrcNoLTO {
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			unset -v _ref\[-{flto,fuse-linker-plugin}\]
 	}
 
 	function bashrcStackProtectorStrong {
-		bashrcSetupFlags flags spstrong || return
-		unset -v flags\[-fstack-protector\]
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			bashrcSetupFlags _ref spstrong &&
+			unset -v '_ref[-fstack-protector]'
 	}
 
-	function bashrcDebugBuild {
+	function bashrcNoStackProtector {
+		[[ $1 ]] && typeset -n _ref=$1 &&
+			unset -v _ref\[-fstack-protector{,-strong}\]
+
+		_ref[-fno-stack-protector]=
+	}
+
+	function bashrcBashHook {
 		export EXTRA_ECONF=--without-bash-malloc
-		#function pre_src_configure {
-			#eval unset -f src_configure \; \
-				#"$(typeset -fp src_configure | sed -r 's/^(local myconf).*/\1=(--without-bash-malloc)/')"
-		#}
-	}
-
-	function bashrcDebugBuild2 {
-		bashrcBaseFlags || return
-		bashrcSetupFlags flags prof debug
-		unset -v flags\[{-OFast,-fno-stack-protector,-fomit-frame-pointer}\]
-		eval flags\[{-O0,-ggdb}\]=
-		export MAKEOPTS=-j1
+		
+# 		function pre_src_configure {
+# 			eval unset -f src_configure \; \
+# 				"$(typeset -fp src_configure | sed -r 's/^(local myconf).*/\1=(--without-bash-malloc)/')"
+# 		}
 	}
 
 	function bashrcDgKamFix {
-		bashrcBaseFlags || return
 		export MYSQL_TOOLS_PATH=/usr/share/mysql/scripts
 	}
 
 	function bashrcDoBinutils {
-		bashrcBaseFlags || return
 		export EXTRA_ECONF=--enable-gold=default
 	}
 
-	function bashrcEpUser {
-		bashrcBaseFlags || return
-		post_src_prepare() { epatch_user; }
-	}
-
-	function bashrcDoChromium {
-		bashrcBaseFlags || return
-		unset -v 'flags[-Ofast]'
-		flags[-O3]=
-	}
-
 	function bashrcKdevelopCollisionIgnore {
-		bashrcBaseFlags || return
 		export COLLISION_IGNORE='/usr/share/kdevappwizard/templates/qmake_qt4guiapp.tar.bz2'
 	}
-
 }
 
 # Prevent elusive namespace issues.
 function __bashrc_Func_Tool__ {
 	typeset -a bashrcFuncs=(
-		bashrcSetupFlags
-		bashrcRunHooks
-		bashrcRunSingleHook
-		bashrcBaseFlags
+		arrayToSet
+		bashrcAMake112
+		bashrcBashHook
+		bashrcDgKamFix
+		bashrcDoBinutils
+		bashrcDoKsh
+		bashrcFdLimit
 		bashrcHeimdal
+		bashrcIsClang
+		bashrcKdeLibs
+		bashrcKdevelopCollisionIgnore
+		bashrcNoDebug
 		bashrcNoError
 		bashrcNoFast
 		bashrcNoGraphite
-		bashrcKdeLibs
+		bashrcNoLTO
 		bashrcPlainBuild
-		bashrcDebugBuild
-		bashrcDoChromium
-		bashrcDoBinutils
-		bashrcAMake112
-		bashrcDgKamFix
-		bashrcDoKsh
-		bashrcEpUser
-		bashrcIsClang
-		bashrcKdevelopCollisionIgnore
+		bashrcRunHooks
+		bashrcSetupFlags
+		checkValidNames
 	)
 
 	case $1 in
@@ -201,29 +261,29 @@ function __bashrc_Func_Tool__ {
 			typeset func
 			for func in "${bashrcFuncs[@]}"; do
 				if [[ $(type -t "$func") == function ]]; then
-					ewarn "${FUNCNAME}: FUNCTION COLLISION DETECTED! ${func}"
+					eerror "${FUNCNAME}: FUNCTION COLLISION DETECTED! ${func}"
 					return 1
 				fi
 			done
 			;;
 		cleanup)
 			if ! unset -f "${bashrcFuncs[@]}" __bashrc_Func_Tool__ __bashrc_Funcs__ __bashrc_Main__; then
-				ewarn "${FUNCNAME}: Failed cleaning up functions."
+				eerror "${FUNCNAME}: Failed cleaning up functions."
 				return 1
 			fi
 			;;
 		*)
-			ewarn "${FUNCNAME}: Invalid operation: ${1}. Doing nothing."
+			eerror "${FUNCNAME}: Invalid operation: ${1}. Doing nothing."
 			return 1
 	esac
 }
 
 function __bashrc_Main__ {
-	# Force current bash. Because why not?
 	unset -v IFS
+	# Force current bash. Because why not?
 	(( BASH_VERSINFO[0] >= 4 && BASH_VERSINFO[1] >= 3 )) || die 'bashrc requires at least Bash 4.3.'
 
-	typeset -a shopts=(extglob lastpipe)
+	typeset -a shopts=(extglob lastpipe expand_aliases)
 	typeset opt
 	for opt in "${!shopts[@]}"; do
 		if shopt -q "${shopts[opt]}"; then
@@ -232,7 +292,7 @@ function __bashrc_Main__ {
 			shopt -s "${shopts[opt]}"
 		fi
 	done
-	(( ${#shopts[@]} )) && trap 'trap RETURN; shopt -u "${shopts[@]}"' RETURN
+	(( ${#shopts[@]} )) && trap "trap RETURN; shopt -u ${shopts[*]}" RETURN
 
 	# We could try to save and restore functions to avoid collisions, but
 	# it's probably better to just fail loudly and fix the collision
@@ -242,33 +302,37 @@ function __bashrc_Main__ {
 
 	# Define mappings from package names to a set of hook functions.
 	typeset -A hookMap=(
-		[app-admin/mcelog]='(bashrcDebugBuild2)'
-		[app-shells/ksh]='(bashrcDebugBuild)' [app-shells/mksh]='(bashrcDebugBuild)' [app-shells/bash]='(bashrcBaseFlags bashrcDebugBuild bashrcStackProtectorStrong)'
-		[app-office/libreoffice]='(bashrcPlainBuild)'
-		[dev-db/sqlite]='(bashrcBaseFlags bashrcNoFast)' [dev-db/postgresql-base]='(bashrcBaseFlags bashrcNoFast)' [dev-db/postgresql]='(bashrcBaseFlags bashrcNoFast)'
-		[dev-python/pyxattr]='(bashrcNoError)'
-		[dev-util/valgrind]='(bashrcEpUser)' [dev-util/radare2]='(bashrcPlainBuild)'
-		[gnome-extra/libgda]='(bashrcBaseFlags bashrcNoFast)'
+		[app-shells/bash]='(bashrcBashHook)'
+		[app-office/libreoffice]='(bashrcNoFast bashrcNoDebug)'
+		[dev-db/sqlite]='(bashrcNoFast)'
+		[dev-db/postgresql]='(bashrcNoFast)'
+		#[dev-libs/protobuf]='(bashrcNoLTO)'
+		[dev-lang/mono]='(bashrcNoLTO)'
+		[dev-qt/qt-creator]='(bashrcNoFast)'
+		[dev-qt/qtwebkit]='(bashrcNoFast)'
+		[gnome-extra/libgda]='(bashrcNoFast)'
 		[kde-apps/okular]='(bashrcNoError)'
-		[kde-base/kdelibs]='(bashrcBaseFlags bashrcNoFast)'
-		[kde-frameworks/kjs]='(bashrcPlainBuild)'
-		[media-gfx/digikam]='(bashrcDgKamFix)' [media-gfx/rawstudio]='(bashrcBaseFlags bashrcNoFast)'
-		[media-libs/opus]='(bashrcPlainBuild)'
-		[net-analyzer/rrdtool]='(bashrcBaseFlags bashrcNoFast)'
-		[net-misc/openssh]='(bashrcDebugBuild)'
-		[net-proxy/polipo]='(bashrcDebugBuild)'
-		[sys-fs/udev]='(bashrcBaseFlags bashrcNoFast)'
-		[sys-libs/db]='(bashrcBaseFlags bashrcNoFast)'
+		[kde-base/kdelibs]='(bashrcNoFast)'
+		[kde-frameworks/kjs]='(bashrcNoFast)'
+		[media-gfx/digikam]='(bashrcDgKamFix)'
+		[media-gfx/rawstudio]='(bashrcNoFast)'
+		[media-gfx/mypaint]='(bashrcNoLTO)'
+		[media-libs/mesa]='(bashrcNoLTO)'
+		[media-libs/opus]='(bashrcNoFast)'
+		[net-analyzer/rrdtool]='(bashrcNoFast)'
+		[net-libs/nodejs]='(bashrcNoFast bashrcNoGraphite)'
+		[sys-fs/udev]='(bashrcNoFast)'
+		[sys-libs/db]='(bashrcNoFast)'
 		[sys-devel/binutils]='(bashrcDoBinutils)'
-		[www-client/phantomjs]='(bashrcBaseFlags bashrcNoFast)'
-		[www-client/chromium]='(bashrcBaseFlags bashrcNoFast bashrcStackProtectorStrong)'
-		[www-client/firefox]='(bashrcBaseFlags bashrcStackProtectorStrong)'
-		[www-servers/apache]='(bashrcStackProtectorStrong)' [www-servers/nginx]='(bashrcStackProtectorStrong)'
+		[www-client/phantomjs]='(bashrcNoFast)'
+		[www-client/chromium]='(bashrcNoFast bashrcNoDebug bashrcFdLimit)'
+		[www-client/firefox]='(bashrcNoFast bashrcNoDebug)'
+		[www-servers/apache]='(bashrcStackProtectorStrong)'
+		[www-servers/nginx]='(bashrcStackProtectorStrong)'
 	)
 
 	bashrcRunHooks "hookMap[${CATEGORY}/${PN}]" || die "bashrc: RunHooks failed with status $?."
 	einfo $'bashrc computed flags:\n'"$(declare -p CFLAGS CXXFLAGS LDFLAGS)"
-	
 	export I_PROMISE_TO_SUPPLY_PATCHES_WITH_BUGS=1
 	unset -v QT_SELECT
 	__bashrc_Func_Tool__ cleanup || die 'bashrc: cleanup failed.'
