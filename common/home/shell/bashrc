@@ -1,3 +1,4 @@
+#!/bin/bash
 [[ $- == *i* ]] || return
 
 shopt -s extglob lastpipe expand_aliases
@@ -18,8 +19,9 @@ function main {
 		shopt -s extglob lastpipe globstar expand_aliases cmdhist histappend checkwinsize 2>/dev/null
 		set -o vi                        # Set interactive vi mode.
 		set +o histexpand                # Disable history expansion.
-		#unset -v HISTFILESIZE
-		#HISTSIZE=-1
+		set -b                           # Immediate job completion notification.
+		[[ $EUID == 0 ]] && ulimit -n 8196
+		return 0
 	}
 
 	# Set env vars that always apply to this user's interactive shells.
@@ -28,7 +30,6 @@ function main {
 		unset -v HOME; export HOME=~
 		stripTildesFromColonDelimitedFields PATH || echo 'PATH was modified to remove tildes!' >&2 
 		[[ $EUID != 0 && $PWD != "$HOME" ]] && command cd 
-		source /etc/profile
 
 		unset -v PYTHONPATH
 		export XMLLINT_INDENT='    '     # Make the xmllint formatter use 4-space indents.
@@ -36,16 +37,13 @@ function main {
 		export COMP_CONFIGURE_HINTS=1    # Avoid stripping description in --option=description of './configure --help'
 		export COMP_TAR_INTERNAL_PATHS=1 # Define to avoid flattening internal contents of tar files
 		export MONO_USE_LLVM=1
+		[[ $TERM == linux ]] && export TERM=linux-16color # If this is a real linux VT then allow 16 colors (default is 8).
 
-		# If this is a real linux VT then allow 16 colors (default is 8) and swap caps-lock / escape keys
-		# See "remapEsc" in "functions" to do the same in X.
-		if [[ $TERM == linux ]]; then
-			export TERM=linux-16color
-			loadkeys -
-		fi <<-\EOF 2>/dev/null
-		keycode 1 = Caps_Lock
-		keycode 58 = Escape
-	EOF
+		declare -g \
+			PROMPT_DIRTRIM=3 \
+			HISTSIZE=10000000 \
+			HISTTIMEFORMAT='%c ' \
+			PROMPT_COMMAND='history -a'
 	}
 
 	function setupAgentDaemons {
@@ -62,7 +60,7 @@ function main {
 		fi
 
 		if gpg-connect-agent /bye; then
-			unset -v SSH_AGENT_PID
+			#unset -v SSH_AGENT_PID
 			if [[ ${gnupg_SSH_AUTH_SOCK_by:-0} != "${BASHPID:-$$}" ]]; then
 				export SSH_AUTH_SOCK=${HOME}/.gnupg/S.gpg-agent.ssh
 			fi
@@ -88,7 +86,7 @@ function main {
 		typeset -n __var
 
 		for __var; do 
-			printf -- %s "$var" | IFS= read -rd '' -a pathComponents
+			printf -- %s "${__var}" | IFS= read -rd '' -a pathComponents
 			field= __var=
 			for field in "${pathComponents[@]}"; do
 				if [[ $field == *\~* ]]; then
@@ -135,13 +133,15 @@ function main {
 	}
 
 	# Do this last to avoid modifying functions.
-	function setupAliases {
+	function setupInteractiveAliases {
 		shopt -s expand_aliases
 
 		alias \
-			ls='command ls -h --color=auto --group-directories-first --classify' \
-			grep='command grep --color=auto' \
-			tree='command tree -ugphD'
+			ls='ls -h --color=auto --group-directories-first --classify' \
+			grep='grep --color=auto' \
+			tree='tree -ugphD' \
+			curl='curl --xattr' \
+			info='info --vi-keys'
 	}
 
 	typeset -a bashrcInternalFunctions
@@ -150,11 +150,17 @@ function main {
 	typeset -a bashrcFuncCalls=(
 		setupUniversalOptions
 		setupUniversalEnvironment
-		setupDbusSessionBus
-		setupAgentDaemons
 		sourceFuncs
-		setupAliases
+		setupInteractiveAliases
 	)
+	
+	if shopt -q login_shell; then
+		bashrcFuncCalls+=(
+			setupDbusSessionBus
+			setupAgentDaemons
+			remapEsc
+		)
+	fi
 
 	typeset ifun
 	for ifun in "${bashrcFuncCalls[@]}"; do
@@ -166,4 +172,4 @@ function main {
 
 main "$@"
 
-# vim: set fenc=utf-8 ff=unix :
+# vim: set fenc=utf-8 ff=unix ft=sh :
