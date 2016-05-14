@@ -1,0 +1,39 @@
+{
+	"dev-libs/icu:0": [
+		"dev-libs/icu-56.1-r1",
+		"933",
+		[
+			"/usr/lib/libicudata.so.55.1",
+			"/usr/lib/libicui18n.so.55.1",
+			"/usr/lib/libicuuc.so.55.1",
+			"/usr/lib/libicuuc.so.55",
+			"/usr/lib/libicudata.so.55",
+			"/usr/lib/libicui18n.so.55"
+		]
+	],
+	"sys-devel/autogen:0": [
+		"sys-devel/autogen-5.15",
+		"221",
+		[
+			"/usr/lib/libopts.so.25.11.3",
+			"/usr/lib/libopts.so.25"
+		]
+	],
+	"sys-devel/llvm:0": [
+		"sys-devel/llvm-3.5.0",
+		"511",
+		[
+			"/usr/lib/libLLVM-3.5.so"
+		]
+	],
+	"sys-fs/progsreiserfs:0": [
+		"sys-fs/progsreiserfs-0.3.1_rc8",
+		"326",
+		[
+			"/usr/lib/libreiserfs-0.3.so.0.0.1",
+			"/usr/lib/libdal-0.3.so.0.0.1",
+			"/usr/lib/libdal-0.3.so.0",
+			"/usr/lib/libreiserfs-0.3.so.0"
+		]
+	]
+}

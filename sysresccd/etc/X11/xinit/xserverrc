@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /usr/bin/X "$@" ${XDG_VTR+"vt${XDG_VTNR}"}

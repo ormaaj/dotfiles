@@ -1,0 +1,101 @@
+#sys-auth/pambase pam_ssh
+app-admin/salt gnupg
+app-arch/p7zip wxwidgets
+app-crypt/gcr gtk
+app-crypt/johntheripper opencl
+app-crypt/pinentry gtk clipboard gnome-keyring -qt4
+app-crypt/qca qt4 gcrypt nss openssl
+app-doc/doxygen clang dot doxysearch
+app-doc/pms html
+app-editors/neovim nvimpager
+app-editors/vim python_targets_python3_4 -python_targets_python3_3 -python_targets_python3_5
+app-emulation/libvirt pcap virt-network lxc parted wireshark-plugins
+app-emulation/lxc cgmanager
+app-emulation/lxd btrfs
+app-emulation/qemu tls kqemu sdl alsa qemu-ifup virtfs ssh usbredir spice vte lzo snappy gtk
+app-emulation/spice client
+app-portage/eix sqlite
+app-portage/layman sync-plugin-portage
+app-shells/bash plugins examples
+app-text/asciidoc python_single_target_python2_7
+app-text/ghostscript-gpl cups
+app-text/poppler qt4
+dev-db/postgresql doc uuid python_single_target_python3_4 -python_single_target_python2_7
+dev-dotnet/* developer
+dev-java/junit source
+dev-java/oracle-jdk-bin javafx
+dev-java/swing-layout source
+dev-lang/ghc ghcbootstrap
+dev-lang/perl ithreads
+dev-libs/boost -tools
+dev-libs/libpcre pcre16
+dev-libs/libpeas python_targets_python3_4 -python_targets_python3_3 -python_targets_python3_5
+dev-libs/zlib pcre16
+dev-python/PyQt4 webkit sql script declarative
+dev-python/PyQt5 gui widgets -webkit
+dev-qt/qtdeclarative localstorage
+dev-qt/qtgui jpeg egl mng
+dev-qt/qtscript scripttools
+dev-qt/qtwebengine widgets
+dev-qt/qtwebkit qml
+dev-util/kdevelop cvs java php sql okteta qthelp cxx clang
+dev-util/kdevplatform subversion classbrowser debug konsole reviewboard
+dev-util/monodevelop developer
+dev-util/perf gtk slang
+dev-vcs/git gtk cvs tk highlight
+dev-vcs/git-cola python_single_target_python3_4 -python_single_target_python2_7 -doc
+dev-vcs/subversion -dso perl
+gnome-base/libglade python_single_target_python2_7 
+gnome-base/librsvg -tools
+kde-apps/dolphin thumbnail
+kde-apps/kde4-l10n minimal
+kde-apps/ktp-common-internals otr
+kde-apps/okular dpi
+kde-plasma/plasma-desktop legacy-systray
+media-gfx/exiv2 xmp
+media-gfx/fontforge png
+media-libs/gd jpeg png fontconfig
+media-libs/libpng apng
+media-libs/libvpx svc
+media-libs/mesa vdpau g3dvl gbm openvg dri3 r600-llvm-compiler llvm xvmc xa wayland osmesa gles2 -classic 
+media-libs/mlt -kde sdl melt kdenlive
+media-libs/opencv contrib
+media-plugins/gst-plugins-meta ogg vorbis
+media-video/ffmpeg xvid schroedinger opencore-amr network vpx dirac opus quvi sdl -samba
+media-video/mplayer bidi opencore-amr dirac -cdparanoia -gtk
+media-video/mplayer2 -quvi
+media-video/mpv bidi libmpv drm ladspa
+media-video/smplayer -qt4 streaming
+media-video/vlc aalib cddax dirac rtsp fbcon opengl x264 bidi v4l v4l2 libv4l2 vlm xosd win32codecs dvd ffmpeg mpeg mad aac dts a52 ogg flac theora ogg vorbis matroska freetype bidi xv svga gnutls stream vlm cdda vcd live cddb dvb upnp schroedinger qt5 -nsplugin -httpd -qt4 #-samba
+net-analyzer/nmap gtk nmap-update nping ncat ndiff zenmap
+net-analyzer/wireshark qt5 gtk3 adns gnutls gcrypt kerberos smi zlib tfshark -doc -doc-pdf -gtk -gtk2 -qt4
+net-dns/avahi gtk3 mdnsresponder-compat autoipd
+net-dns/dnsmasq script
+net-firewall/ipset -modules
+net-firewall/iptables nftables conntrack
+net-fs/nfs-utils nfsdcld
+net-libs/libproxy -kde -mono
+net-libs/telepathy-qt farstream
+net-misc/curl http2 rtmp ssh -adns
+net-misc/tor stats
+sys-apps/lm_sensors sensord
+sys-apps/microcode-data initramfs
+sys-apps/openrc newnet
+sys-block/parted device-mapper
+sys-devel/gcc graphite lto doc cilk openmp go fortran
+sys-devel/llvm clang gold lldb xml ocaml
+sys-fs/dosfstools compat
+sys-fs/ecryptfs-utils gtk
+sys-fs/lvm2 -thin
+sys-libs/ncurses -gpm
+sys-libs/zlib minizip static-libs
+virtual/ffmpeg sdl
+www-client/chromium system-v8 system-ffmpeg custom-cflags -gecko-mediaplayer
+www-client/firefox mozdevelop system-cairo system-icu system-jpeg system-libvpx -egl -qt4 -qt5
+www-client/w3m -ssl
+www-servers/xsp developer
+x11-libs/libdrm libkms
+x11-libs/libxcb xkb
+dev-lua/lpeg luajit
+dev-lua/mpack luajit
+dev-vcs/gitg -python_targets_python3_5

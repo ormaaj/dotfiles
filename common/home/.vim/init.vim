@@ -1,0 +1,1 @@
+/home/ormaaj/doc/projects/dotfiles/common/home/vimrc

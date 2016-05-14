@@ -1,0 +1,37 @@
+# vim: set ft=gitconfig noet:
+[user]
+	name = Dan Douglas
+	email = d@ndougl.as
+	signingkey = 0x326C836A6760F8CC
+[web]
+	browser = chromium
+[browser "chromium"]
+	cmd = chromium
+[diff]
+	renamelimit = 0
+	guitool = meld
+[core]
+	excludesfile = /home/smorg/.gitignore
+	pager = less
+	sharedRepository = true
+[difftool]
+	prompt = false
+[man]
+	viewer = vim
+[merge]
+	tool = meld
+[push]
+	default = matching
+[init]
+	templatedir = ~/.git_template
+[commit]
+	gpgsign = 1
+[pull]
+	ff = only
+[credential]
+	username = ormaaj
+	helper = /usr/bin/pinentry
+[include]
+	path = /dotfiles/common/home/github.config
+[man "vim"]
+	cmd = set +o posix && . /dotfiles/common/home/shell/interactivefunctions-common && man

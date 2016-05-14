@@ -1,0 +1,8 @@
+>=sys-boot/grub-9999
+>=app-emulation/wine-9999
+#>=dev-lang/ghc-8.0
+dev-qt/*:5/5.7
+#dev-qt/qtwebkit
+#*/*::qt
+#>=dev-libs/boost-1.57.0
+#>=dev-util/boost-build-1.57.0

@@ -1,6 +1,10 @@
 #!/bin/bash
 
-#This file is sourced by bash when you log in interactively.
-[[ -f ~/.bashrc ]] && source ~/.bashrc
+unset -v HOME # tilde-expansion is determined by HOME. Force bash to obtain its value from getpwent(3) on first use.
+if shopt -q login_shell; then
+    [[ -f ~/.bashrc ]] && source ~/.bashrc
+    [[ -f ~root/.dnx/dnvm/dnvm.sh ]] && source /root/.dnx/dnvm/dnvm.sh # Load dnvm
+else
+    exit 1 # Somehow this is a non-bash or non-login shell.
+fi
 
-[ -s "/root/.dnx/dnvm/dnvm.sh" ] && . "/root/.dnx/dnvm/dnvm.sh" # Load dnvm

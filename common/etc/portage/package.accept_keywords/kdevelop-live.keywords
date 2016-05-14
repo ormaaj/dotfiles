@@ -1,0 +1,11 @@
+dev-util/kdevelop **
+dev-util/kdevelop-cppcheck **
+dev-util/kdevelop-css **
+dev-util/kdevelop-go **
+dev-util/kdevelop-krazy2 **
+dev-util/kdevelop-pg-qt **
+dev-util/kdevelop-php **
+dev-util/kdevelop-python **
+dev-util/kdevelop-upload **
+dev-util/kdevelop-valgrind **
+dev-util/kdevplatform **

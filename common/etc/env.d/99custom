@@ -1,0 +1,6 @@
+TMPDIR=/tmp
+_JAVA_AWT_WM_NONREPARENTING=1
+_JAVA_OPTIONS="-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true"
+#R600_ENABLE_S3TC=1
+QT_SELECT=5
+ALSA_CARD=PCH

@@ -1,0 +1,19 @@
+# These settings were set by the catalyst build script that automatically
+# built this stage.
+# Please consult /usr/share/portage/config/make.conf.example for a more
+# detailed example.
+CFLAGS="-Os -mtune=i686 -pipe"
+CXXFLAGS="${CFLAGS}"
+MAKEOPTS="-j5"
+PORTAGE_NICENESS="19"
+ACCEPT_LICENSE="*"
+CFLAGS="-Os -mtune=i686 -pipe"
+CXXFLAGS="-Os -mtune=i686 -pipe"
+FEATURES="parallel-fetch -collision-protect -protect-owned -xattr"
+# WARNING: Changing your CHOST is not something that should be done lightly.
+# Please consult http://www.gentoo.org/doc/en/change-chost.xml before changing.
+CHOST="i486-pc-linux-gnu"
+PORTDIR="/usr/portage"
+DISTDIR="${PORTDIR}/distfiles"
+PKGDIR="${PORTDIR}/packages"
+PORTDIR_OVERLAY="/usr/local/portage"

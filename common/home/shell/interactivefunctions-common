@@ -2,38 +2,15 @@
 
 # Library for platform-independent interactive function definitions.
 
-#function man {
-#	if ! command man -W "$@"; then
-#		return 1
-#	elif [[ ! -t 0 ]]; then
-#		echo 'STDIN must be a tty.' >&2
-#		return 1
-#	fi
-#
-#
-#	if [[ $- != *m* ]]; then
-#		set -m
-#	fi
-#
-#	trap 'trap RETURN; set +m' RETURN
-#
-#	typeset serverlist servername=manpages
-#
-#	# if vim --serverlist | grep -q "$servername"
-#
-#	typeset serverlist
-#	vim --serverlist | mapfile -tc1 -C ' serverlist'
-#
-#	{
-#		{
-#			groffer --text -Tutf8 -rLL=$((${COLUMNS:-$(tput cols)}-10))n -man "$@" 2>/dev/null ||
-#				kill -"$BASHPID"
-#		} | sed -e 's/\x1B\[[[:digit:]]\+m//g' | vim -c 'set nomod ft=man' --servername manpages --remote /dev/fd/4 4<&0 <&3
-#	} 3<&0
-#}
+function man {
+	if ! command man -W "$@"; then
+		return 1
+	elif [[ ! -t 0 ]]; then
+		echo 'STDIN must be a tty.' >&2
+		return 1
+	fi
 
-function brc {
-	command . ~/.bashrc
+	groffer --text -Tutf8 -rLL=$((${COLUMNS:-$(tput cols)}-10))n -man "$@" 2>/dev/null | sed -e 's/\x1B\[[[:digit:]]\+m//g' | nvim -c 'set nomod ft=man | syntax on' -
 }
 
 # Hack for defining functions from template code read from stdin.
@@ -43,29 +20,31 @@ function _function {
 	command eval function "$1" $'{\n' "$(cat)" $'\n}'
 }
 
+# rdesktop wrapper
+function myrdp {
+	rm -rf ~/.rdesktop
+	case $1 in
+		work)
+			rdesktop -EKPzg 1920x1200 -x 0x8F -a 32 -u DWDouglas -d Orbits.net -n Unknown localhost:3390
+			;;
+		kvm)
+			rdesktop -EKg 1920x1200 -x 0x80 -a 24 -u Administrator 192.168.1.3
+			;;
+		laptop)
+			rdesktop -EKg 1920x1200 -x 0x80 -a 24 -u ormaaj ormaaj-win8
+			;;
+		*)
+			return 1
+	esac
+}
+
+
 function pushd {
 	command pushd "${@:-"$HOME"}"
 }
 
 function sprunge {
 	curl -sF 'sprunge=<-' 'http://sprunge.us' <"${1:-/dev/stdin}"
-}
-
-# Some ssh presets to use when match and host directives would be impractical
-function sshpresets {
-	typeset host
-	for host; do
-		case $host in
-			anapnea.net)
-				ssh -vfNTD 9090 -L 9091:localhost:9050 -p 443 ormaaj@anapnea.net
-				;;
-			ndougl.as)
-				ssh -vfNTD 9092 ormaaj@ndougl.as
-				;;
-			*)
-				printf 'Nothing defined for host: %q\n' "$host" >&2
-		esac
-	done
 }
 
 function whois {

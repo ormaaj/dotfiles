@@ -1,0 +1,6 @@
+set editing-mode vi
+set show-mode-in-prompt On
+set colored-stats On
+set skip-completed-text On
+set complete-into-braces On
+set history-preserve-point On

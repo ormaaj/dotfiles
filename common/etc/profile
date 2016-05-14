@@ -1,0 +1,49 @@
+# /etc/profile: login shell setup
+#
+# This file is used by any Bourne-shell derivative to setup the environment for
+# login shells.
+
+[ -e /etc/profile.env ] && . /etc/profile.env
+export EDITOR PAGER
+: ${EDITOR:=/bin/vi} ${PAGER:=/usr/bin/less}
+
+# 077 would be more secure, but 022 is generally quite realistic
+umask 027
+
+# Set up PATH depending on whether we're root or a normal user.  There's no
+# real reason to exclude sbin paths from the normal user, but it can make
+# tab-completion easier when they aren't in the user's PATH to pollute the
+# executable namespace.
+if [ "$EUID" = "0" ] || [ "$USER" = "root" ]; then
+	PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${ROOTPATH}
+else
+	PATH=/usr/local/bin:/usr/bin:/bin:${PATH}
+fi
+export PATH
+unset -v ROOTPATH
+
+# /etc/bash/bashrc will setup PS1 including color.  Bash login shells run only
+# /etc/profile. Bash non-login shells run only /etc/bash/bashrc. Since we want to
+# run /etc/bash/bashrc regardless, we source it from here. It is unfortunate
+# that there is no way to do this *after* the user's .bash_profile runs
+# (without putting it in the user's dot-files), but it shouldn't make any
+# difference.
+if ${BASH_VERSION+\:} false; then
+	if [ -f /etc/bash/bashrc ]; then
+		. /etc/bash/bashrc
+	else
+		PS1='\u@\h \w \$ '
+	fi
+else
+	# Setup a bland default prompt for portability and non-color terminals.
+	{ PS1=${USER:-$(whoami)}@$(uname -n)' $ '; } >/dev/null 2>&1
+fi
+
+for sh in /etc/profile.d/*; do
+	[ -f "$sh" ] || continue
+	. "$sh"
+done
+
+unset -v sh
+
+# vim: set fenc=utf-8 ff=unix ft=sh :

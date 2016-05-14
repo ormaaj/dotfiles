@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-shopt -s extglob
-
 # Debugging function for colored display of argv.
 function args {
 	{ BASH_XTRACEFD=3 command eval ${BASH_VERSION+"$(</dev/fd/0)"}; } <<-'EOF' 3>/dev/null
@@ -83,36 +81,6 @@ function colorCommand {
     :
 }
 
-# Formatted cleancache stats
-function ccmon {
-	typeset i interval=${1:-.5}
-
-	while :; do
-		for i in /sys/kernel/mm/cleancache/*; do
-			printf '%-15s %d\n' "${i##*/}:" "$(<"$i")"
-		done
-		sleep "$interval"
-		clear
-	done
-}
-
-# Set radeon power management
-function clk {
-	typeset base=/sys/class/drm/card0/device
-	[[ -r ${base}/hwmon/hwmon0/temp1_input && -r ${base}/power_profile ]] || return 1
-
-	case $1 in
-		low|high|default)
-			printf '%s\n' "temp: $(<${base}/hwmon/hwmon0/temp1_input)C" "old profile: $(<${base}/power_profile)"
-			echo "$1" >${base}/power_profile
-			echo "new profile: $(<${base}/power_profile)"
-			;;
-		*)
-			echo "Usage: $FUNCNAME [ low | high | default ]"
-			printf '%s\n' "temp: $(<${base}/hwmon/hwmon0/temp1_input)C" "current profile: $(<${base}/power_profile)"
-	esac
-}
-
 # exit with a optional status and optional message. status defaults to the previous command.
 # die [ status ] [ formatstring ] [ message args ... ]
 function die {
@@ -134,67 +102,6 @@ function die {
 	exit "$status"
 }
 
-# Open EAPI pdf
-function eapi {
-	okular "$(equery f -f doc app-doc/pms:live | grep '.pdf$')" >/dev/null 2>&1 &
-	disown
-}
-
-# List eix overlay numbers.
-function eolist {
-	OVERLAYS_LIST=all PRINT_COUNT_ALWAYS=never eix -!
-}
-
-function eResolveAtom {
-	typeset my_overlay=$(portageq get_repo_path / custom)
-
-	case $(</dev/fd/3) in
-		0)
-			if [[ ! $(</dev/stdin) =~ (.*)/(.*) ]]; then
-				echo 'Error parsing atom.'
-				return 6
-			fi
-			;;
-		1) echo 'eix returned status 1'
-			return 1
-			;;
-		2) echo "No packages matching $1"
-			return 2
-			;;
-		3|4) printf '%s' 'Must specify a unique package atom.'
-			;;&
-		3) echo "${1} matches:"
-			cat
-			return 3
-			;;
-		4) echo
-			return 4
-			;;
-		*) echo 'eix returned unknown status > 4'
-			return 5
-	esac <<\EOF <&3 <<<'' >&2
-trap 'printf %s "$?"' EXIT
-[[ ${1+_} ]] || exit 4
-NOFOUND_STATUS=2 MOREFOUND_STATUS=3 eix --only-names -e -- "$1" >/dev/stdin
-EOF
-
-	eval "${2}"'=( "${BASH_REMATCH[@]}" )'
-}
-
-function etest {
-	local INFD savefd
-	export INFD
-	{
-		ebuild --skip-manifest "$(portageq get_repo_path / custom)"/gentoo-debug/p/p-0.ebuild "${@:1:$#-1}"
-	} {savefd}<&0 <<<"${!#}" {INFD}<&0 <&"$savefd"-
-	cat "$(portageq envvar PORTAGE_TMPDIR)"/portage/
-}
-
-# function flags (
-# grep -E '^(C|LD)(XX)?FLAGS' </etc/make.conf | mapfile -t out
-# echo "${out[@]}"
-# )
-
 function getEnv {
 	${1:+\:} return 1
 	typeset -n name ret=$1
@@ -210,10 +117,6 @@ function zipLongest {
 	:
 }
 
-function info {
-	command info --vi-keys
-}
-
 function inArray {
 	set -- "$1" "${2}[@]"
 	local x
@@ -221,26 +124,6 @@ function inArray {
 		[[ $1 == "$1" ]] && return
 	done
 	x=$1 "$FUNCNAME" "${!2}"
-}
-
-function pmatch {
-	${1+typeset x=}"${1-false}" &&
-	while command shift; do
-		[[ $x == $1 ]] && return
-	done 2>/dev/null
-	return 1
-}
-
-function isSubset {
-	local -a 'xkeys=("${!'"$1"'[@]}")' 'ykeys=("${!'"$2"'[@]}")'
-	set -- "${@/%/[key]}"
-
-	(( ${#xkeys[@]} <= ${#ykeys[@]} )) || return 1
-
-	typeset key
-	for key in "${xkeys[@]}"; do
-		[[ ${!2+_} && ${!1} == "${!2}" ]] || return 1
-	done
 }
 
 function isDigit {

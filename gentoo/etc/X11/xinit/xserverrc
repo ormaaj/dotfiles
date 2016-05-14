@@ -1,6 +1,0 @@
-#!/bin/sh
-if [ -z "$XDG_VTNR" ]; then
-  exec /usr/bin/X "$@"
-else
-  exec /usr/bin/X "$@" vt$XDG_VTNR
-fi
